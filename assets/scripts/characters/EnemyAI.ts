@@ -1,7 +1,12 @@
 import { _decorator, Animation, Collider2D, Node, Vec3 } from 'cc';
 import { StateMachine } from '../core/StateMachine';
 import { CharacterBase } from './CharacterBase';
-import { getChaseVector, shouldChaseTarget, shouldHoldMeleeRange } from '../combat/CombatMath';
+import {
+  getChaseVector,
+  shouldApplyTimedAttackDamage,
+  shouldChaseTarget,
+  shouldHoldMeleeRange,
+} from '../combat/CombatMath';
 
 const { ccclass, property } = _decorator;
 type EnemyState = 'idle' | 'patrol' | 'chase' | 'attack' | 'hit' | 'dead';
@@ -24,7 +29,13 @@ export class EnemyAI extends CharacterBase {
   attackCooldown = 1.2;
 
   @property
-  attackLockDuration = 0.36;
+  attackWindup = 0.28;
+
+  @property
+  attackDamageMoment = 0.22;
+
+  @property
+  attackLockDuration = 0.55;
 
   @property
   deathCleanupDelay = 0.45;
@@ -32,6 +43,8 @@ export class EnemyAI extends CharacterBase {
   private stateMachine!: StateMachine<EnemyState, EnemyAI>;
   private attackTimer = 0;
   private attackLockTimer = 0;
+  private attackElapsed = 0;
+  private attackDamageApplied = false;
   private patrolDirection = -1;
   private defeatedHandled = false;
 
@@ -49,6 +62,7 @@ export class EnemyAI extends CharacterBase {
 
   override update(deltaTime: number): void {
     super.update(deltaTime);
+    const wasAttacking = this.attackLockTimer > 0;
     this.attackTimer = Math.max(0, this.attackTimer - deltaTime);
     this.attackLockTimer = Math.max(0, this.attackLockTimer - deltaTime);
 
@@ -60,11 +74,17 @@ export class EnemyAI extends CharacterBase {
 
     if (this.isInHitStun()) {
       this.stateMachine.transitionTo('hit');
+      this.cancelAttack();
       return;
     }
 
-    if (this.attackLockTimer > 0) {
-      return;
+    if (wasAttacking) {
+      this.attackElapsed += deltaTime;
+      this.faceTarget();
+      this.tryApplyAttackDamage();
+      if (this.attackLockTimer > 0) {
+        return;
+      }
     }
 
     if (!this.target) {
@@ -101,16 +121,31 @@ export class EnemyAI extends CharacterBase {
   private playAttack(): void {
     this.attackTimer = this.attackCooldown;
     this.attackLockTimer = this.attackLockDuration;
+    this.attackElapsed = 0;
+    this.attackDamageApplied = false;
     this.faceTarget();
     this.playAnimation('enemy_attack');
+  }
+
+  private tryApplyAttackDamage(): void {
     if (!this.target) {
       return;
     }
 
+    if (!shouldApplyTimedAttackDamage(
+      this.attackElapsed,
+      this.attackDamageMoment,
+      this.attackDamageApplied,
+      this.attackWindup,
+    )) {
+      return;
+    }
+
+    this.attackDamageApplied = true;
     const targetCharacter = this.target.getComponent(CharacterBase);
     const distance = this.getTargetDistance();
     if (targetCharacter && distance <= this.attackRange) {
-      targetCharacter.takeDamage({ attack: this.attack, defense: targetCharacter.defense, skillPower: 1 }, this.hitStun);
+      targetCharacter.takeDamage({ attack: this.attack, defense: targetCharacter.defense, skillPower: 1 }, this.hitStun, this.node);
       targetCharacter.knockback(24, this.node);
     }
   }
@@ -131,6 +166,8 @@ export class EnemyAI extends CharacterBase {
 
     this.defeatedHandled = true;
     this.attackLockTimer = 0;
+    this.attackElapsed = 0;
+    this.attackDamageApplied = true;
     this.node.getComponents(Collider2D).forEach((collider) => {
       collider.enabled = false;
     });
@@ -147,6 +184,12 @@ export class EnemyAI extends CharacterBase {
     }
 
     return Vec3.distance(this.node.worldPosition, this.target.worldPosition);
+  }
+
+  private cancelAttack(): void {
+    this.attackLockTimer = 0;
+    this.attackElapsed = 0;
+    this.attackDamageApplied = true;
   }
 
   private playAnimation(name: string): void {

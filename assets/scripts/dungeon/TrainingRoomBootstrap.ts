@@ -20,9 +20,11 @@ import {
 import { PlayerController } from '../characters/PlayerController';
 import { EnemyAI } from '../characters/EnemyAI';
 import { HitBox } from '../combat/HitBox';
+import { HurtBox } from '../combat/HurtBox';
 import { DungeonRoomManager } from './DungeonRoomManager';
 import { SkillComponent } from '../skills/SkillComponent';
 import { CombatHud } from '../ui/CombatHud';
+import { EnemyHealthHud } from '../ui/EnemyHealthHud';
 import {
   PLAYER_PIXEL_PARTS,
   SLIME_PIXEL_PARTS,
@@ -171,13 +173,18 @@ export class TrainingRoomBootstrap extends Component {
       ai.maxHp = 120;
       ai.attack = 18;
       ai.defense = 3;
-      ai.moveSpeed = 130;
+      ai.moveSpeed = 85;
       ai.hitStun = 0.2;
       ai.invulnerableTime = 0.08;
       ai.aggroRange = 360;
-      ai.attackRange = 72;
-      ai.attackCooldown = 1.2;
+      ai.attackRange = 96;
+      ai.attackCooldown = 1.35;
+      ai.attackWindup = 0.28;
+      ai.attackDamageMoment = 0.22;
+      ai.attackLockDuration = 0.55;
       ai.target = player;
+      enemy.addComponent(HurtBox).owner = ai;
+      enemy.addComponent(EnemyHealthHud);
       room.registerEnemy(ai);
     });
   }
