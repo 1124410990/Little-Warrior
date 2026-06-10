@@ -37,7 +37,7 @@
   },
   "slash_wave": {
     "id": "slash_wave",
-    "displayName": "破风斩",
+    "displayName": "疾风刺",
     "animationName": "player_skill_slash_wave",
     "attack": 60,
     "skillPower": 1.8,

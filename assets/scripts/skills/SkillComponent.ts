@@ -1,4 +1,4 @@
-﻿import { _decorator, Component, Node } from 'cc';
+﻿import { _decorator, Component, Node, Vec3 } from 'cc';
 import { SkillConfig } from '../core/GameTypes';
 import { HitBox } from '../combat/HitBox';
 import { resolveAttackBoxOffset } from '../combat/CombatMath';
@@ -10,7 +10,7 @@ const DEFAULT_SKILLS: Record<string, SkillConfig> = {
   basic_1: { id: 'basic_1', displayName: '普攻一段', animationName: 'player_attack_1', attack: 28, skillPower: 1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 18, hitStun: 0.18 },
   basic_2: { id: 'basic_2', displayName: '普攻二段', animationName: 'player_attack_2', attack: 32, skillPower: 1.1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 22, hitStun: 0.2 },
   basic_3: { id: 'basic_3', displayName: '普攻三段', animationName: 'player_attack_3', attack: 42, skillPower: 1.25, cooldown: 0.3, activeStart: 0.1, activeEnd: 0.2, knockback: 38, hitStun: 0.28 },
-  slash_wave: { id: 'slash_wave', displayName: '破风斩', animationName: 'player_skill_slash_wave', attack: 60, skillPower: 1.8, cooldown: 3, activeStart: 0.12, activeEnd: 0.34, knockback: 64, hitStun: 0.38 },
+  slash_wave: { id: 'slash_wave', displayName: '疾风刺', animationName: 'player_skill_slash_wave', attack: 60, skillPower: 1.8, cooldown: 3, activeStart: 0.12, activeEnd: 0.34, knockback: 64, hitStun: 0.38 },
 };
 
 interface ActiveSkillWindow {
@@ -68,6 +68,7 @@ export class SkillComponent extends Component {
       const position = this.hitBoxRoot.position.clone();
       position.x = resolveAttackBoxOffset(position.x, facing, Boolean(ownerCharacter?.facingVisualRoot));
       this.hitBoxRoot.setPosition(position);
+      this.hitBoxRoot.setScale(new Vec3(facing >= 0 ? 1 : -1, 1, 1));
     }
     this.hitBox?.preview(skill);
     return true;

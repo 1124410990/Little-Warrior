@@ -1,8 +1,9 @@
-import { _decorator, Animation, Collider2D, Node, Vec3 } from 'cc';
+import { _decorator, Animation, Collider2D, Node, Tween, tween, Vec3 } from 'cc';
 import { StateMachine } from '../core/StateMachine';
 import { CharacterBase } from './CharacterBase';
 import {
   getChaseVector,
+  resolveMeleeLungePose,
   shouldApplyTimedAttackDamage,
   shouldChaseTarget,
   shouldHoldMeleeRange,
@@ -45,6 +46,7 @@ export class EnemyAI extends CharacterBase {
   private attackLockTimer = 0;
   private attackElapsed = 0;
   private attackDamageApplied = false;
+  private attackTween: Tween<Node> | null = null;
   private patrolDirection = -1;
   private defeatedHandled = false;
 
@@ -58,6 +60,10 @@ export class EnemyAI extends CharacterBase {
       hit: { enter: (ctx) => ctx.playAnimation('enemy_hit') },
       dead: { enter: (ctx) => ctx.playAnimation('enemy_dead') },
     }, 'idle');
+  }
+
+  protected onDestroy(): void {
+    this.attackTween?.stop();
   }
 
   override update(deltaTime: number): void {
@@ -125,6 +131,7 @@ export class EnemyAI extends CharacterBase {
     this.attackDamageApplied = false;
     this.faceTarget();
     this.playAnimation('enemy_attack');
+    this.playAttackMotion();
   }
 
   private tryApplyAttackDamage(): void {
@@ -168,6 +175,7 @@ export class EnemyAI extends CharacterBase {
     this.attackLockTimer = 0;
     this.attackElapsed = 0;
     this.attackDamageApplied = true;
+    this.stopAttackMotion();
     this.node.getComponents(Collider2D).forEach((collider) => {
       collider.enabled = false;
     });
@@ -190,11 +198,51 @@ export class EnemyAI extends CharacterBase {
     this.attackLockTimer = 0;
     this.attackElapsed = 0;
     this.attackDamageApplied = true;
+    this.stopAttackMotion();
   }
 
   private playAnimation(name: string): void {
     if (this.animation?.clips.some((clip) => clip.name === name)) {
       this.animation.play(name);
     }
+  }
+
+  private playAttackMotion(): void {
+    const visual = this.facingVisualRoot;
+    if (!visual) {
+      return;
+    }
+
+    const facing = this.getFacing();
+    const start = resolveMeleeLungePose(0, facing);
+    const peak = resolveMeleeLungePose(0.35, facing);
+    const end = resolveMeleeLungePose(1, facing);
+    this.attackTween?.stop();
+    visual.setPosition(start.x, 0, 0);
+    visual.setScale(new Vec3(facing * start.scaleX, start.scaleY, 1));
+    this.attackTween = tween(visual)
+      .to(0.12, { position: new Vec3(peak.x, 0, 0), scale: new Vec3(facing * peak.scaleX, peak.scaleY, 1) })
+      .to(0.2, { position: new Vec3(end.x, 0, 0), scale: new Vec3(facing * end.scaleX, end.scaleY, 1) })
+      .call(() => {
+        this.attackTween = null;
+        this.resetAttackMotion();
+      })
+      .start();
+  }
+
+  private stopAttackMotion(): void {
+    this.attackTween?.stop();
+    this.attackTween = null;
+    this.resetAttackMotion();
+  }
+
+  private resetAttackMotion(): void {
+    const visual = this.facingVisualRoot;
+    if (!visual) {
+      return;
+    }
+
+    visual.setPosition(0, 0, 0);
+    visual.setScale(new Vec3(this.getFacing(), 1, 1));
   }
 }

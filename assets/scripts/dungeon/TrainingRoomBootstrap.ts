@@ -111,13 +111,14 @@ export class TrainingRoomBootstrap extends Component {
   }
 
   private createPlayer(parent: Node): { node: Node; controller: PlayerController; skills: SkillComponent } {
-    const playerActor = this.createActorNode('Player', PLAYER_PIXEL_PARTS);
+    const playerActor = this.createPlayerActorNode('Player');
     const player = playerActor.root;
     player.setPosition(-360, -100, 0);
     parent.addChild(player);
 
     const controller = player.addComponent(PlayerController);
     controller.facingVisualRoot = playerActor.visual;
+    controller.weaponPivot = playerActor.weaponPivot;
     controller.characterId = 'player_warrior';
     controller.displayName = '小勇士';
     controller.maxHp = 320;
@@ -204,7 +205,7 @@ export class TrainingRoomBootstrap extends Component {
     const skillBar = this.createProgressBar('SkillCooldownBar', -430, 235);
     canvasNode.addChild(skillBar.node);
 
-    const controlsLabel = this.createLabel('ControlsLabel', '方向键移动  |  X 普攻  |  Z 破风斩', 18);
+    const controlsLabel = this.createLabel('ControlsLabel', '方向键移动  |  X 普攻  |  Z 疾风刺', 18);
     controlsLabel.node.setPosition(0, -292, 0);
     canvasNode.addChild(controlsLabel.node);
 
@@ -246,17 +247,36 @@ export class TrainingRoomBootstrap extends Component {
     return node;
   }
 
-  private createPixelArtNode(name: string, parts: readonly PixelPart[]): Node {
+  private createPixelArtNode(name: string, parts: readonly PixelPart[], offset = new Vec2(0, 0)): Node {
     const node = new Node(name);
     const bounds = getPixelArtBounds(parts);
     node.addComponent(UITransform).setContentSize(bounds.width, bounds.height);
     const graphics = node.addComponent(Graphics);
     parts.forEach((part) => {
       graphics.fillColor = this.toColor(part.color);
-      graphics.rect(part.x, part.y, part.width, part.height);
+      graphics.rect(part.x - offset.x, part.y - offset.y, part.width, part.height);
       graphics.fill();
     });
     return node;
+  }
+
+  private createPlayerActorNode(name: string): { root: Node; visual: Node; weaponPivot: Node } {
+    const weaponNames = new Set(['Sword', 'SwordCore', 'SwordGuard']);
+    const bodyParts = PLAYER_PIXEL_PARTS.filter((part) => !weaponNames.has(part.name));
+    const weaponParts = PLAYER_PIXEL_PARTS.filter((part) => weaponNames.has(part.name));
+    const root = new Node(name);
+    const bounds = getPixelArtBounds(PLAYER_PIXEL_PARTS);
+    root.addComponent(UITransform).setContentSize(bounds.width, bounds.height);
+
+    const visual = this.createPixelArtNode(`${name}Visual`, bodyParts);
+    root.addChild(visual);
+
+    const weaponPivot = new Node('WeaponPivot');
+    weaponPivot.setPosition(24, -14, 0);
+    const weapon = this.createPixelArtNode('SwordVisual', weaponParts, new Vec2(24, -14));
+    weaponPivot.addChild(weapon);
+    root.addChild(weaponPivot);
+    return { root, visual, weaponPivot };
   }
 
   private createActorNode(name: string, parts: readonly PixelPart[]): { root: Node; visual: Node } {
