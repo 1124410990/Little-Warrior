@@ -1,4 +1,4 @@
-﻿import { _decorator, Component, Node, Vec3 } from 'cc';
+﻿import { _decorator, Component, Node, Tween, tween, Vec3 } from 'cc';
 import { CharacterStats } from '../core/GameTypes';
 import { canHitTarget, calculateDamage, DamageInput } from '../combat/CombatMath';
 import { getFacingFromHorizontalInput, normalizeMoveVector, type MoveVector } from '../input/KeyboardMapping';
@@ -10,6 +10,16 @@ export interface DamageResult {
   damage: number;
   remainingHp: number;
   defeated: boolean;
+}
+
+export const CHARACTER_DAMAGED_EVENT = 'character-damaged';
+
+export interface CharacterDamagedEvent {
+  damage: number;
+  remainingHp: number;
+  maxHp: number;
+  defeated: boolean;
+  source?: Node;
 }
 
 @ccclass('CharacterBase')
@@ -46,6 +56,7 @@ export class CharacterBase extends Component {
   protected invulnerableUntil = 0;
   protected hitStunRemaining = 0;
   protected elapsedTime = 0;
+  private knockbackTween: Tween<Node> | null = null;
 
   start(): void {
     this.hp = this.maxHp;
@@ -68,7 +79,7 @@ export class CharacterBase extends Component {
     this.hp = stats.maxHp;
   }
 
-  takeDamage(input: DamageInput, stunSeconds = this.hitStun): DamageResult {
+  takeDamage(input: DamageInput, stunSeconds = this.hitStun, source?: Node): DamageResult {
     if (!canHitTarget({ hp: this.hp, invulnerableUntil: this.invulnerableUntil }, this.elapsedTime)) {
       return { accepted: false, damage: 0, remainingHp: this.hp, defeated: this.isDefeated() };
     }
@@ -77,6 +88,13 @@ export class CharacterBase extends Component {
     this.hp = Math.max(0, this.hp - damage);
     this.hitStunRemaining = stunSeconds;
     this.invulnerableUntil = this.elapsedTime + this.invulnerableTime;
+    this.node.emit(CHARACTER_DAMAGED_EVENT, {
+      damage,
+      remainingHp: this.hp,
+      maxHp: this.maxHp,
+      defeated: this.isDefeated(),
+      source,
+    } satisfies CharacterDamagedEvent);
     return { accepted: true, damage, remainingHp: this.hp, defeated: this.isDefeated() };
   }
 
@@ -101,9 +119,16 @@ export class CharacterBase extends Component {
 
   knockback(distance: number, source: Node): void {
     const direction = this.node.worldPosition.x >= source.worldPosition.x ? 1 : -1;
-    const position = this.node.position.clone();
-    position.x += direction * Math.max(0, distance);
-    this.node.setPosition(position);
+    const targetPosition = this.node.position.clone();
+    targetPosition.x += direction * Math.max(0, distance);
+
+    this.knockbackTween?.stop();
+    this.knockbackTween = tween(this.node)
+      .to(0.08, { position: targetPosition })
+      .call(() => {
+        this.knockbackTween = null;
+      })
+      .start();
   }
 
   getHp(): number {

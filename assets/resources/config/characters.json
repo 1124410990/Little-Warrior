@@ -15,11 +15,11 @@
     "maxHp": 120,
     "attack": 18,
     "defense": 3,
-    "moveSpeed": 130,
+    "moveSpeed": 85,
     "hitStun": 0.2,
     "invulnerableTime": 0.08,
     "aggroRange": 360,
-    "attackRange": 70,
-    "attackCooldown": 1.2
+    "attackRange": 96,
+    "attackCooldown": 1.35
   }
 }

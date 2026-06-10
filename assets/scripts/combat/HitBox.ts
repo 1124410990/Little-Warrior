@@ -1,6 +1,7 @@
-import { _decorator, Collider2D, Color, Component, Contact2DType, Graphics, IPhysics2DContact, Node } from 'cc';
+import { _decorator, Collider2D, Color, Component, Contact2DType, Graphics, IPhysics2DContact, Node, PhysicsSystem2D } from 'cc';
 import { SkillConfig } from '../core/GameTypes';
 import { CharacterBase } from '../characters/CharacterBase';
+import { HurtBox } from './HurtBox';
 
 const { ccclass, property } = _decorator;
 
@@ -24,11 +25,16 @@ export class HitBox extends Component {
     collider?.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
   }
 
+  update(): void {
+    this.scanOverlappingTargets();
+  }
+
   activate(skill: SkillConfig): void {
     this.skill = skill;
     this.hitTargets.clear();
     this.drawSkillEffect(skill, true);
     this.setActive(true);
+    this.scanOverlappingTargets();
   }
 
   preview(skill: SkillConfig): void {
@@ -72,20 +78,53 @@ export class HitBox extends Component {
   }
 
   private onBeginContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact | null): void {
-    if (!this.active || !this.skill || this.hitTargets.has(other.node)) {
+    if (!this.active || !this.skill) {
       return;
     }
 
-    const target = other.node.getComponent(CharacterBase);
+    this.tryHitTarget(other);
+  }
+
+  private scanOverlappingTargets(): void {
+    if (!this.active || !this.skill) {
+      return;
+    }
+
+    const collider = this.getComponent(Collider2D);
+    if (!collider?.enabled) {
+      return;
+    }
+
+    PhysicsSystem2D.instance.testAABB(collider.worldAABB).forEach((other) => {
+      if (other !== collider) {
+        this.tryHitTarget(other);
+      }
+    });
+  }
+
+  private tryHitTarget(other: Collider2D): void {
+    if (!this.skill) {
+      return;
+    }
+
+    const skill = this.skill;
+    const target = this.resolveTarget(other.node);
     const ownerCharacter = this.owner?.getComponent(CharacterBase);
-    if (!target || !ownerCharacter || target === ownerCharacter) {
+    if (!target || !ownerCharacter || target === ownerCharacter || this.hitTargets.has(target.node)) {
       return;
     }
 
-    const result = target.takeDamage({ attack: this.skill.attack, defense: target.defense, skillPower: this.skill.skillPower }, this.skill.hitStun);
+    const result = target.takeDamage({ attack: skill.attack, defense: target.defense, skillPower: skill.skillPower }, skill.hitStun, this.owner ?? undefined);
     if (result.accepted) {
-      target.knockback(this.skill.knockback, this.owner!);
-      this.hitTargets.add(other.node);
+      target.knockback(skill.knockback, this.owner!);
+      this.hitTargets.add(target.node);
     }
+  }
+
+  private resolveTarget(node: Node): CharacterBase | null {
+    return node.getComponent(HurtBox)?.owner
+      ?? node.getComponent(CharacterBase)
+      ?? node.parent?.getComponent(CharacterBase)
+      ?? null;
   }
 }

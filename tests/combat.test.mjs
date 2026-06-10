@@ -4,11 +4,14 @@ import {
   applyKnockback,
   canHitTarget,
   getChaseVector,
+  resolveSeparationOffset,
   resolveAttackBoxOffset,
   resolveFacingOffset,
+  shouldApplyTimedAttackDamage,
   shouldChaseTarget,
   shouldHoldMeleeRange,
 } from '../assets/scripts/combat/CombatMath.ts';
+import { readFileSync } from 'node:fs';
 import { StateMachine } from '../assets/scripts/core/StateMachine.ts';
 import {
   DEFAULT_INPUT_BINDINGS,
@@ -28,6 +31,9 @@ assert.equal(calculateDamage({ attack: 40, defense: 100, skillPower: 1 }), 1);
 
 assert.deepEqual(applyKnockback({ x: 10, y: 4 }, { x: 2, y: 99 }, 18), { x: 28, y: 4 });
 assert.deepEqual(applyKnockback({ x: 10, y: 4 }, { x: 30, y: 99 }, 18), { x: -8, y: 4 });
+assert.deepEqual(resolveSeparationOffset({ x: 0, y: 0 }, [{ x: 100, y: 0 }], 58), { x: 0, y: 0 });
+assert.deepEqual(resolveSeparationOffset({ x: 0, y: 0 }, [{ x: 20, y: 0 }], 58), { x: -19, y: 0 });
+assert.deepEqual(resolveSeparationOffset({ x: 0, y: 0 }, [{ x: 0, y: 0 }], 58, 1), { x: 29, y: 0 });
 assert.deepEqual(getChaseVector({ x: 0, y: 0 }, { x: 30, y: -40 }), { x: 0.6, y: -0.8 });
 assert.deepEqual(getChaseVector({ x: 10, y: 4 }, { x: 10, y: 4 }), { x: 0, y: 0 });
 assert.equal(resolveFacingOffset(70, 1), 70);
@@ -40,6 +46,17 @@ assert.equal(shouldHoldMeleeRange(90, 72), false);
 assert.equal(shouldChaseTarget(90, 360, 72), true);
 assert.equal(shouldChaseTarget(70, 360, 72), false);
 assert.equal(shouldChaseTarget(400, 360, 72), false);
+assert.equal(shouldApplyTimedAttackDamage(0.21, 0.22, false), false);
+assert.equal(shouldApplyTimedAttackDamage(0.22, 0.22, false), true);
+assert.equal(shouldApplyTimedAttackDamage(0.4, 0.22, true), false);
+assert.equal(shouldApplyTimedAttackDamage(0.27, 0.22, false, 0.28), false);
+assert.equal(shouldApplyTimedAttackDamage(0.28, 0.22, false, 0.28), true);
+
+const characterConfigText = readFileSync(new URL('../assets/resources/config/characters.json', import.meta.url), 'utf8').replace(/^\uFEFF/, '');
+const characterConfig = JSON.parse(characterConfigText);
+assert.equal(characterConfig.enemy_slime.moveSpeed, 85);
+assert.equal(characterConfig.enemy_slime.attackRange, 96);
+assert.equal(characterConfig.enemy_slime.attackCooldown, 1.35);
 
 assert.equal(canHitTarget({ hp: 10, invulnerableUntil: 0 }, 0.2), true);
 assert.equal(canHitTarget({ hp: 0, invulnerableUntil: 0 }, 0.2), false);
