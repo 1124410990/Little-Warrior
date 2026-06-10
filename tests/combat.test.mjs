@@ -7,6 +7,10 @@ import {
   resolveSeparationOffset,
   resolveAttackBoxOffset,
   resolveFacingOffset,
+  resolveMeleeLungePose,
+  resolveWeaponThrustPose,
+  resolveWeaponSlashPose,
+  shouldDrawSkillAreaEffect,
   shouldApplyTimedAttackDamage,
   shouldChaseTarget,
   shouldHoldMeleeRange,
@@ -41,6 +45,17 @@ assert.equal(resolveFacingOffset(70, -1), -70);
 assert.equal(resolveFacingOffset(-70, 1), 70);
 assert.equal(resolveAttackBoxOffset(70, -1, true), -70);
 assert.equal(resolveAttackBoxOffset(70, -1, false), 70);
+assert.deepEqual(resolveWeaponSlashPose(0, 1), { angle: 68, x: 18, y: 22 });
+assert.deepEqual(resolveWeaponSlashPose(0.5, 1), { angle: -4, x: 34, y: 4 });
+assert.deepEqual(resolveWeaponSlashPose(1, -1), { angle: 76, x: -18, y: -20 });
+assert.deepEqual(resolveWeaponThrustPose(0, 1), { angle: -86, x: 12, y: -6 });
+assert.deepEqual(resolveWeaponThrustPose(0.5, 1), { angle: -90, x: 58, y: -2 });
+assert.deepEqual(resolveWeaponThrustPose(1, -1), { angle: 86, x: -24, y: -14 });
+assert.deepEqual(resolveMeleeLungePose(0, 1), { scaleX: 1, scaleY: 1, x: 0 });
+assert.deepEqual(resolveMeleeLungePose(0.35, 1), { scaleX: 1.18, scaleY: 0.82, x: 15 });
+assert.deepEqual(resolveMeleeLungePose(1, -1), { scaleX: 1, scaleY: 1, x: 0 });
+assert.equal(shouldDrawSkillAreaEffect('basic_1'), false);
+assert.equal(shouldDrawSkillAreaEffect('slash_wave'), true);
 assert.equal(shouldHoldMeleeRange(70, 72), true);
 assert.equal(shouldHoldMeleeRange(90, 72), false);
 assert.equal(shouldChaseTarget(90, 360, 72), true);

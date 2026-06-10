@@ -1,7 +1,21 @@
-import { _decorator, Collider2D, Color, Component, Contact2DType, Graphics, IPhysics2DContact, Node, PhysicsSystem2D } from 'cc';
+import {
+  _decorator,
+  Collider2D,
+  Color,
+  Component,
+  Contact2DType,
+  Graphics,
+  IPhysics2DContact,
+  Node,
+  PhysicsSystem2D,
+  tween,
+  UITransform,
+  Vec3,
+} from 'cc';
 import { SkillConfig } from '../core/GameTypes';
 import { CharacterBase } from '../characters/CharacterBase';
 import { HurtBox } from './HurtBox';
+import { shouldDrawSkillAreaEffect } from './CombatMath';
 
 const { ccclass, property } = _decorator;
 
@@ -33,7 +47,7 @@ export class HitBox extends Component {
     this.skill = skill;
     this.hitTargets.clear();
     this.drawSkillEffect(skill, true);
-    this.setActive(true);
+    this.setActive(true, shouldDrawSkillAreaEffect(skill.id));
     this.scanOverlappingTargets();
   }
 
@@ -41,7 +55,7 @@ export class HitBox extends Component {
     this.skill = skill;
     this.hitTargets.clear();
     this.drawSkillEffect(skill, false);
-    this.setActive(false, true);
+    this.setActive(false, shouldDrawSkillAreaEffect(skill.id));
   }
 
   deactivate(): void {
@@ -51,7 +65,7 @@ export class HitBox extends Component {
 
   private setActive(active: boolean, visible = active): void {
     this.active = active;
-    this.node.active = visible;
+    this.node.active = active || visible;
     const collider = this.getComponent(Collider2D);
     if (collider) {
       collider.enabled = active;
@@ -66,14 +80,41 @@ export class HitBox extends Component {
 
     const isWave = skill.id === 'slash_wave';
     graphics.clear();
-    graphics.fillColor = new Color(255, 220, 96, active ? 180 : 90);
-    graphics.rect(isWave ? -64 : -48, isWave ? -30 : -22, isWave ? 128 : 96, isWave ? 60 : 44);
+    if (!isWave) {
+      return;
+    }
+
+    graphics.fillColor = new Color(255, 223, 104, active ? 92 : 52);
+    graphics.moveTo(-58, 24);
+    graphics.lineTo(40, 18);
+    graphics.lineTo(68, 0);
+    graphics.lineTo(40, -18);
+    graphics.lineTo(-58, -24);
+    graphics.close();
     graphics.fill();
-    graphics.fillColor = new Color(255, 255, 240, active ? 235 : 140);
-    graphics.rect(isWave ? -38 : -30, -8, isWave ? 96 : 72, 16);
+    graphics.fillColor = new Color(255, 255, 238, active ? 205 : 120);
+    graphics.moveTo(-44, 8);
+    graphics.lineTo(42, 7);
+    graphics.lineTo(64, 0);
+    graphics.lineTo(42, -7);
+    graphics.lineTo(-44, -8);
+    graphics.close();
     graphics.fill();
-    graphics.fillColor = new Color(72, 184, 255, active ? 210 : 120);
-    graphics.rect(isWave ? 38 : 24, isWave ? -36 : -26, isWave ? 20 : 14, isWave ? 72 : 52);
+    graphics.fillColor = new Color(104, 202, 255, active ? 150 : 80);
+    graphics.moveTo(-16, 18);
+    graphics.lineTo(58, 7);
+    graphics.lineTo(70, 0);
+    graphics.lineTo(58, -7);
+    graphics.lineTo(-16, -18);
+    graphics.close();
+    graphics.fill();
+    graphics.fillColor = new Color(255, 255, 255, active ? 230 : 130);
+    graphics.moveTo(-24, 3);
+    graphics.lineTo(54, 2);
+    graphics.lineTo(66, 0);
+    graphics.lineTo(54, -2);
+    graphics.lineTo(-24, -3);
+    graphics.close();
     graphics.fill();
   }
 
@@ -117,8 +158,42 @@ export class HitBox extends Component {
     const result = target.takeDamage({ attack: skill.attack, defense: target.defense, skillPower: skill.skillPower }, skill.hitStun, this.owner ?? undefined);
     if (result.accepted) {
       target.knockback(skill.knockback, this.owner!);
+      this.spawnHitImpact(target);
       this.hitTargets.add(target.node);
     }
+  }
+
+  private spawnHitImpact(target: CharacterBase): void {
+    const effect = new Node('HitImpact');
+    effect.addComponent(UITransform).setContentSize(56, 48);
+    const graphics = effect.addComponent(Graphics);
+    const ownerX = this.owner?.worldPosition.x ?? target.node.worldPosition.x;
+    const direction = ownerX <= target.node.worldPosition.x ? -1 : 1;
+
+    graphics.fillColor = new Color(255, 246, 180, 235);
+    graphics.moveTo(0, 16);
+    graphics.lineTo(10, 2);
+    graphics.lineTo(0, -12);
+    graphics.lineTo(-10, 2);
+    graphics.close();
+    graphics.fill();
+    graphics.fillColor = new Color(255, 196, 74, 210);
+    graphics.rect(-26, 6, 18, 5);
+    graphics.rect(8, -16, 24, 5);
+    graphics.fill();
+    graphics.fillColor = new Color(120, 210, 255, 190);
+    graphics.rect(-4, -22, 7, 18);
+    graphics.rect(14, 10, 8, 20);
+    graphics.fill();
+
+    target.node.addChild(effect);
+    effect.setPosition(24 * direction, 8, 0);
+    effect.setScale(new Vec3(0.65, 0.65, 1));
+    tween(effect)
+      .to(0.08, { scale: new Vec3(1.2, 1.2, 1) })
+      .to(0.06, { scale: new Vec3(0.85, 0.85, 1) })
+      .call(() => effect.destroy())
+      .start();
   }
 
   private resolveTarget(node: Node): CharacterBase | null {
