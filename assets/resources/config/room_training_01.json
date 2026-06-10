@@ -1,0 +1,11 @@
+﻿{
+  "roomId": "training_room_01",
+  "displayName": "训练房间",
+  "enemyPrefab": "enemy_slime",
+  "spawnPoints": [
+    { "x": 360, "y": -80 },
+    { "x": 560, "y": -140 },
+    { "x": 760, "y": -100 }
+  ],
+  "clearMessage": "通关！"
+}

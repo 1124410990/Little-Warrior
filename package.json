@@ -1,0 +1,16 @@
+{
+  "name": "little-warrior",
+  "version": "3.8.8",
+  "private": true,
+  "type": "module",
+  "description": "Cocos Creator 3.8 TypeScript side-scrolling combat demo.",
+  "littleWarriorVersion": "0.1.0",
+  "scripts": {
+    "test": "node ./tests/combat.test.mjs"
+  },
+  "devDependencies": {},
+  "creator": {
+    "version": "3.8.8"
+  },
+  "uuid": "64355683-630c-4c99-88e6-ddcea338578d"
+}

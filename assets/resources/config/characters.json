@@ -1,0 +1,25 @@
+﻿{
+  "player": {
+    "id": "player_warrior",
+    "displayName": "小勇士",
+    "maxHp": 320,
+    "attack": 36,
+    "defense": 8,
+    "moveSpeed": 260,
+    "hitStun": 0.22,
+    "invulnerableTime": 0.12
+  },
+  "enemy_slime": {
+    "id": "enemy_slime",
+    "displayName": "训练史莱姆",
+    "maxHp": 120,
+    "attack": 18,
+    "defense": 3,
+    "moveSpeed": 130,
+    "hitStun": 0.2,
+    "invulnerableTime": 0.08,
+    "aggroRange": 360,
+    "attackRange": 70,
+    "attackCooldown": 1.2
+  }
+}
