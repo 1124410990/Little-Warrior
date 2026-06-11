@@ -12,6 +12,9 @@ export interface DamageResult {
   defeated: boolean;
 }
 
+/*
+ * 角色受击事件由角色节点自身派发，HUD、房间管理等表现层只订阅事件，不反向依赖战斗实现。
+ */
 export const CHARACTER_DAMAGED_EVENT = 'character-damaged';
 
 export interface CharacterDamagedEvent {
@@ -79,6 +82,9 @@ export class CharacterBase extends Component {
     this.hp = stats.maxHp;
   }
 
+  /*
+   * 统一处理无敌帧、伤害结算、硬直和事件派发，避免玩家与怪物各自实现一套受击规则。
+   */
   takeDamage(input: DamageInput, stunSeconds = this.hitStun, source?: Node): DamageResult {
     if (!canHitTarget({ hp: this.hp, invulnerableUntil: this.invulnerableUntil }, this.elapsedTime)) {
       return { accepted: false, damage: 0, remainingHp: this.hp, defeated: this.isDefeated() };
@@ -102,6 +108,9 @@ export class CharacterBase extends Component {
     this.movePlane({ x: axis, y: 0 }, deltaTime);
   }
 
+  /*
+   * 角色移动入口会屏蔽死亡和受击硬直状态，并在归一化后更新朝向，避免斜向移动更快。
+   */
   movePlane(move: MoveVector, deltaTime: number): void {
     if (this.isDefeated() || this.isInHitStun()) {
       return;
@@ -117,6 +126,9 @@ export class CharacterBase extends Component {
     this.updateFacingScale();
   }
 
+  /*
+   * 击退只沿横轴生效，保证横版动作手感稳定，不因为上下移动导致角色被推离战斗层。
+   */
   knockback(distance: number, source: Node): void {
     const direction = this.node.worldPosition.x >= source.worldPosition.x ? 1 : -1;
     const targetPosition = this.node.position.clone();

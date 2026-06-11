@@ -9,6 +9,9 @@ export interface TransitionOptions {
   reenter?: boolean;
 }
 
+/*
+ * 通用状态机只负责生命周期回调和 canEnter 守卫，不持有任何 Cocos 节点依赖，便于纯逻辑测试。
+ */
 export class StateMachine<StateName extends string, Context> {
   private readonly context: Context;
   private readonly states: Record<StateName, StateDefinition<Context>>;
@@ -29,6 +32,9 @@ export class StateMachine<StateName extends string, Context> {
     return this.currentStateName;
   }
 
+  /*
+   * 默认忽略同状态重复进入；需要重播攻击等动画时通过 reenter 显式触发 enter。
+   */
   transitionTo(nextStateName: StateName, options: TransitionOptions = {}): boolean {
     if (nextStateName === this.currentStateName && !options.reenter) {
       return true;

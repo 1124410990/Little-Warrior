@@ -23,6 +23,9 @@ export const DEFAULT_INPUT_BINDINGS: InputBindings = {
   smallSkill: 'KeyZ',
 };
 
+/*
+ * 输入层只产出轴向意图，不直接移动节点，便于后续替换手柄或自定义键位。
+ */
 export function resolveMoveVector(
   pressedCodes: ReadonlySet<string>,
   bindings: InputBindings = DEFAULT_INPUT_BINDINGS,
@@ -38,6 +41,9 @@ export function resolveMoveVector(
   };
 }
 
+/*
+ * 只有水平输入会改变朝向，上下移动不应让角色在横版战斗中突然翻面。
+ */
 export function getFacingFromHorizontalInput(move: MoveVector, currentFacing: number): number {
   if (move.x > 0) {
     return 1;
@@ -50,6 +56,9 @@ export function getFacingFromHorizontalInput(move: MoveVector, currentFacing: nu
   return currentFacing >= 0 ? 1 : -1;
 }
 
+/*
+ * 归一化移动向量用于修正斜向移动速度，避免斜走比水平移动更快。
+ */
 export function normalizeMoveVector(move: MoveVector): MoveVector {
   const length = Math.hypot(move.x, move.y);
   if (length === 0) {
@@ -70,6 +79,9 @@ export function isSmallSkill(code: string, bindings: InputBindings = DEFAULT_INP
   return code === bindings.smallSkill;
 }
 
+/*
+ * 战斗动作解析集中在这里，PlayerController 不需要知道具体键位配置结构。
+ */
 export function getCombatActionFromInput(
   code: string,
   bindings: InputBindings = DEFAULT_INPUT_BINDINGS,

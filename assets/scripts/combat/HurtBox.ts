@@ -3,6 +3,9 @@ import { CharacterBase } from '../characters/CharacterBase';
 
 const { ccclass, property } = _decorator;
 
+/*
+ * HurtBox 作为可选受击代理，允许碰撞节点和角色根节点分离，同时仍能回溯到 CharacterBase。
+ */
 @ccclass('HurtBox')
 export class HurtBox extends Component {
   @property(CharacterBase)

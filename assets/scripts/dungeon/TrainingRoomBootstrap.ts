@@ -35,11 +35,17 @@ import {
 
 const { ccclass, property } = _decorator;
 
+/*
+ * 训练房启动器在空场景中程序化搭建战斗闭环，降低早期手感验证对预制体资源的依赖。
+ */
 @ccclass('TrainingRoomBootstrap')
 export class TrainingRoomBootstrap extends Component {
   @property
   rebuildOnStart = true;
 
+  /*
+   * 已存在 Canvas 时跳过重建，避免编辑器手工搭建内容在预览启动时被重复创建。
+   */
   start(): void {
     if (!this.rebuildOnStart || this.node.getChildByName('Canvas')) {
       return;
@@ -60,6 +66,9 @@ export class TrainingRoomBootstrap extends Component {
     this.createEnemies(canvas, room, player.node);
   }
 
+  /*
+   * 训练场使用 2D 物理但关闭重力，角色位移完全由控制器和 AI 驱动。
+   */
   private setupPhysics(): void {
     const physics = PhysicsSystem2D.instance;
     physics.enable = true;
@@ -83,6 +92,9 @@ export class TrainingRoomBootstrap extends Component {
     return canvasNode;
   }
 
+  /*
+   * 背景和地面都用 Graphics 绘制，保证没有外部贴图时也能快速预览关卡层次。
+   */
   private createGround(parent: Node): void {
     const backWall = this.createRectNode('BackWall', 1100, 320, new Color(31, 39, 55, 255));
     backWall.setPosition(0, -120, 0);
@@ -110,6 +122,9 @@ export class TrainingRoomBootstrap extends Component {
     parent.addChild(floorLines);
   }
 
+  /*
+   * 玩家节点将身体视觉和武器 pivot 分离，便于普攻挥砍与技能前刺分别调动作。
+   */
   private createPlayer(parent: Node): { node: Node; controller: PlayerController; skills: SkillComponent } {
     const playerActor = this.createPlayerActorNode('Player');
     const player = playerActor.root;
@@ -153,6 +168,9 @@ export class TrainingRoomBootstrap extends Component {
     return { node: player, controller, skills };
   }
 
+  /*
+   * 程序化敌人用于训练房固定波次，所有怪物都指向同一个玩家目标。
+   */
   private createEnemies(parent: Node, room: DungeonRoomManager, player: Node): void {
     const spawnPoints = [
       new Vec3(-120, -80, 0),
@@ -190,6 +208,9 @@ export class TrainingRoomBootstrap extends Component {
     });
   }
 
+  /*
+   * HUD 只绑定可观察的角色和技能组件，显示逻辑由 CombatHud 每帧读取当前状态。
+   */
   private createHud(canvasNode: Node, player: PlayerController, skills: SkillComponent): { messageLabel: Label } {
     const hpLabel = this.createLabel('HpLabel', '320 / 320', 24);
     hpLabel.node.setPosition(-320, 275, 0);
@@ -247,6 +268,9 @@ export class TrainingRoomBootstrap extends Component {
     return node;
   }
 
+  /*
+   * 像素块按蓝图绘制到单个 Graphics，适合原型期快速迭代角色剪影和碰撞参考。
+   */
   private createPixelArtNode(name: string, parts: readonly PixelPart[], offset = new Vec2(0, 0)): Node {
     const node = new Node(name);
     const bounds = getPixelArtBounds(parts);
@@ -260,6 +284,9 @@ export class TrainingRoomBootstrap extends Component {
     return node;
   }
 
+  /*
+   * 玩家武器单独挂在 WeaponPivot 下，避免身体翻转和武器动画互相污染。
+   */
   private createPlayerActorNode(name: string): { root: Node; visual: Node; weaponPivot: Node } {
     const weaponNames = new Set(['Sword', 'SwordCore', 'SwordGuard']);
     const bodyParts = PLAYER_PIXEL_PARTS.filter((part) => !weaponNames.has(part.name));
@@ -288,6 +315,9 @@ export class TrainingRoomBootstrap extends Component {
     return { root, visual };
   }
 
+  /*
+   * 初始特效节点只作为 slash_wave 的本地绘制容器，真正显隐和形状刷新由 HitBox 控制。
+   */
   private createSlashEffectNode(name: string): Node {
     const node = new Node(name);
     node.addComponent(UITransform).setContentSize(132, 84);
@@ -313,6 +343,9 @@ export class TrainingRoomBootstrap extends Component {
     return new Color(color[0], color[1], color[2], color[3] ?? 255);
   }
 
+  /*
+   * 角色身体使用 Kinematic 刚体，避免物理系统接管移动，同时保留触发器检测能力。
+   */
   private addBodyCollider(node: Node, size: Size, offset: Vec2, sensor: boolean): void {
     const body = node.addComponent(RigidBody2D);
     body.type = ERigidBody2DType.Kinematic;
