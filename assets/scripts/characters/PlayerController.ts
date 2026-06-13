@@ -12,6 +12,9 @@ import {
 const { ccclass, property } = _decorator;
 type PlayerState = 'idle' | 'run' | 'attack' | 'skill' | 'hit' | 'dead';
 
+/*
+ * 玩家控制器只负责输入、状态切换和手感表现，实际伤害窗口交给 SkillComponent/HitBox。
+ */
 @ccclass('PlayerController')
 export class PlayerController extends CharacterBase {
   @property(SkillComponent)
@@ -51,6 +54,9 @@ export class PlayerController extends CharacterBase {
     this.weaponTween?.stop();
   }
 
+  /*
+   * 攻击和技能期间由 attackLock 锁住移动输入，确保动作不会被奔跑状态立即打断。
+   */
   override update(deltaTime: number): void {
     super.update(deltaTime);
     this.comboTimer = Math.max(0, this.comboTimer - deltaTime);
@@ -77,6 +83,9 @@ export class PlayerController extends CharacterBase {
     this.stateMachine.transitionTo(move.x === 0 && move.y === 0 ? 'idle' : 'run');
   }
 
+  /*
+   * 按键按下时优先处理战斗动作，移动方向则保留在 pressedCodes 中由每帧统一解析。
+   */
   private onKeyDown(event: EventKeyboard): void {
     const code = this.toInputCode(event.keyCode);
     if (!code) {
@@ -126,6 +135,9 @@ export class PlayerController extends CharacterBase {
     }
   }
 
+  /*
+   * 三段普攻由连击计时器衔接；超时后重新从第一段开始，便于独立调整连击节奏。
+   */
   private playAttack(): void {
     this.comboIndex = this.comboTimer > 0 ? (this.comboIndex % 3) + 1 : 1;
     this.comboTimer = 0.45;
@@ -135,6 +147,9 @@ export class PlayerController extends CharacterBase {
     this.skillComponent?.cast(`basic_${this.comboIndex}`, this.getFacing());
   }
 
+  /*
+   * Z 技能使用武器前刺表现，并通过 slash_wave 的判定窗口产生实际命中。
+   */
   private playSkill(): void {
     this.attackLock = 0.55;
     this.playAnimation('player_skill_slash_wave');
@@ -148,6 +163,9 @@ export class PlayerController extends CharacterBase {
     }
   }
 
+  /*
+   * 普攻武器轨迹沿扇形关键帧摆动，和普通攻击框保持“小而贴动作”的视觉语义。
+   */
   private playWeaponSlash(): void {
     if (!this.weaponPivot) {
       return;
@@ -172,6 +190,9 @@ export class PlayerController extends CharacterBase {
       .start();
   }
 
+  /*
+   * 非攻击状态下持续恢复武器待机位，避免 tween 被打断后武器停在上一帧位置。
+   */
   private updateWeaponRestPose(): void {
     if (!this.weaponPivot || this.attackLock > 0) {
       return;
@@ -187,6 +208,9 @@ export class PlayerController extends CharacterBase {
     return new Vec3(24 * this.getFacing(), -14, 0);
   }
 
+  /*
+   * 技能武器轨迹强调向前刺出，和 slash_wave 的剑形模糊特效方向保持一致。
+   */
   private playWeaponThrust(): void {
     if (!this.weaponPivot) {
       return;

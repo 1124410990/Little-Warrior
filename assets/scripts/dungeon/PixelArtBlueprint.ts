@@ -9,6 +9,9 @@ export interface PixelPart {
   color: PixelColor;
 }
 
+/*
+ * 程序化像素人资源用于快速验证战斗手感，后续替换正式美术时保持节点职责一致即可。
+ */
 export const PLAYER_PIXEL_PARTS: readonly PixelPart[] = [
   { name: 'Cape', x: -32, y: -34, width: 18, height: 64, color: [92, 39, 62, 255] },
   { name: 'CapeShade', x: -28, y: -42, width: 10, height: 18, color: [56, 28, 48, 255] },
@@ -28,6 +31,9 @@ export const PLAYER_PIXEL_PARTS: readonly PixelPart[] = [
   { name: 'SwordGuard', x: 18, y: -14, width: 14, height: 6, color: [230, 177, 66, 255] },
 ];
 
+/*
+ * 训练房怪物使用简化史莱姆蓝图，重点服务碰撞和血条反馈验证。
+ */
 export const SLIME_PIXEL_PARTS: readonly PixelPart[] = [
   { name: 'Shadow', x: -28, y: -28, width: 56, height: 8, color: [28, 36, 50, 190] },
   { name: 'BodyBottom', x: -32, y: -22, width: 64, height: 28, color: [58, 166, 96, 255] },
@@ -39,6 +45,9 @@ export const SLIME_PIXEL_PARTS: readonly PixelPart[] = [
   { name: 'Mouth', x: -6, y: -10, width: 12, height: 4, color: [36, 79, 62, 255] },
 ];
 
+/*
+ * 根据像素块反推节点包围尺寸，避免手工维护 UITransform 大小与蓝图内容不一致。
+ */
 export function getPixelArtBounds(parts: readonly PixelPart[]): { width: number; height: number } {
   const minX = Math.min(...parts.map((part) => part.x));
   const maxX = Math.max(...parts.map((part) => part.x + part.width));

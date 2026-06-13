@@ -15,6 +15,9 @@ export interface HitTargetState {
   invulnerableUntil: number;
 }
 
+/*
+ * 伤害公式保留最小 1 点伤害，避免高防御目标把命中反馈完全吞掉。
+ */
 export function calculateDamage(input: DamageInput): number {
   const skillPower = input.skillPower ?? 1;
   const criticalMultiplier = input.criticalMultiplier ?? 1;
@@ -22,11 +25,17 @@ export function calculateDamage(input: DamageInput): number {
   return Math.max(1, Math.round(baseDamage * skillPower * criticalMultiplier));
 }
 
+/*
+ * 击退方向只参考 X 轴相对位置，服务横版战斗的前后关系判断。
+ */
 export function applyKnockback(target: Point2D, attacker: Point2D, distance: number): Point2D {
   const direction = target.x >= attacker.x ? 1 : -1;
   return { x: target.x + direction * Math.max(0, distance), y: target.y };
 }
 
+/*
+ * 多个怪物重叠时返回一个温和分离偏移；完全重合时用 fallbackSign 打破方向对称。
+ */
 export function resolveSeparationOffset(
   current: Point2D,
   others: readonly Point2D[],
@@ -61,6 +70,9 @@ export function resolveSeparationOffset(
   }, { x: 0, y: 0 });
 }
 
+/*
+ * 追击向量归一化后再交给角色移动，保证不同距离下追击速度一致。
+ */
 export function getChaseVector(source: Point2D, target: Point2D): Point2D {
   const deltaX = target.x - source.x;
   const deltaY = target.y - source.y;
@@ -80,6 +92,9 @@ export function resolveFacingOffset(baseOffsetX: number, facing: number): number
   return Math.abs(baseOffsetX) * (facing >= 0 ? 1 : -1);
 }
 
+/*
+ * 有独立 visual root 的角色需要在本地坐标下镜像攻击框，避免视觉翻转后判定仍在旧方向。
+ */
 export function resolveAttackBoxOffset(baseOffsetX: number, facing: number, usesSeparateVisualRoot: boolean): number {
   if (!usesSeparateVisualRoot) {
     return Math.abs(baseOffsetX);
@@ -100,6 +115,9 @@ export interface MeleeLungePose {
   x: number;
 }
 
+/*
+ * 普攻武器采用起手、命中、收刀三段关键帧，便于在无 Cocos 运行时下验证轨迹。
+ */
 export function resolveWeaponSlashPose(progress: number, facing: number): WeaponSlashPose {
   const clampedProgress = clamp01(progress);
   const pose = interpolateKeyframes(
@@ -117,6 +135,9 @@ export function resolveWeaponSlashPose(progress: number, facing: number): Weapon
   };
 }
 
+/*
+ * Z 技能轨迹使用前刺关键帧，强调武器沿朝向快速探出再回收。
+ */
 export function resolveWeaponThrustPose(progress: number, facing: number): WeaponSlashPose {
   const clampedProgress = clamp01(progress);
   const pose = interpolateKeyframes(
@@ -134,6 +155,9 @@ export function resolveWeaponThrustPose(progress: number, facing: number): Weapo
   };
 }
 
+/*
+ * 敌人近战前扑通过缩放和局部位移模拟发力，不改变角色根节点的碰撞位置。
+ */
 export function resolveMeleeLungePose(progress: number, facing: number): MeleeLungePose {
   const clampedProgress = clamp01(progress);
   const peakProgress = 0.35;
@@ -150,6 +174,9 @@ export function resolveMeleeLungePose(progress: number, facing: number): MeleeLu
   };
 }
 
+/*
+ * 只有需要范围提示的技能才绘制区域特效，普攻避免回到大色块占位效果。
+ */
 export function shouldDrawSkillAreaEffect(skillId: string): boolean {
   return skillId === 'slash_wave';
 }
@@ -162,6 +189,9 @@ export function shouldChaseTarget(distance: number, aggroRange: number, attackRa
   return distance <= aggroRange && !shouldHoldMeleeRange(distance, attackRange);
 }
 
+/*
+ * 攻击判定以“最晚的前摇/伤害时点”为准，保证调大 windup 不会提前出伤。
+ */
 export function shouldApplyTimedAttackDamage(
   elapsed: number,
   damageMoment: number,
@@ -175,6 +205,9 @@ export function shouldApplyTimedAttackDamage(
   return elapsed >= Math.max(0, damageMoment, windup);
 }
 
+/*
+ * 命中门槛集中在生命值和无敌时间，方便 HitBox 与直接攻击共用同一套规则。
+ */
 export function canHitTarget(target: HitTargetState, currentTime: number): boolean {
   return target.hp > 0 && currentTime >= target.invulnerableUntil;
 }

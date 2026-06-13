@@ -6,6 +6,9 @@ import { EnemyHealthHud } from '../ui/EnemyHealthHud';
 
 const { ccclass, property } = _decorator;
 
+/*
+ * 房间管理器负责刷怪、怪物分散和通关提示，不直接参与单个角色的战斗判定。
+ */
 @ccclass('DungeonRoomManager')
 export class DungeonRoomManager extends Component {
   @property(Node)
@@ -36,6 +39,9 @@ export class DungeonRoomManager extends Component {
     this.showMessage('击败所有怪物');
   }
 
+  /*
+   * 每帧只处理存活怪物的队形分散和通关状态，死亡隐藏由 EnemyAI 自己负责。
+   */
   update(): void {
     if (this.cleared) {
       return;
@@ -49,6 +55,9 @@ export class DungeonRoomManager extends Component {
     }
   }
 
+  /*
+   * 编辑器预制体刷怪入口，生成后统一补齐目标、血条和 HurtBox 反馈组件。
+   */
   spawnWave(): void {
     if (!this.enemyPrefab) {
       this.showMessage('请在编辑器中绑定 enemyPrefab');
@@ -68,6 +77,9 @@ export class DungeonRoomManager extends Component {
     });
   }
 
+  /*
+   * 程序化搭建场景时使用注册入口，避免重复维护预制体和代码生成两套初始化逻辑。
+   */
   registerEnemy(enemy: EnemyAI): void {
     this.prepareEnemyFeedback(enemy);
     enemy.target = this.player;
@@ -80,6 +92,9 @@ export class DungeonRoomManager extends Component {
     }
   }
 
+  /*
+   * 分散逻辑只施加少量位置修正，避免怪物堆叠遮挡，同时不抢走 EnemyAI 的追击控制权。
+   */
   private separateAliveEnemies(aliveEnemies: EnemyAI[]): void {
     if (aliveEnemies.length < 2) {
       return;
@@ -107,6 +122,9 @@ export class DungeonRoomManager extends Component {
     });
   }
 
+  /*
+   * 怪物反馈组件采用按需补齐，兼容手工摆放节点和运行时生成节点。
+   */
   private prepareEnemyFeedback(enemy: EnemyAI): void {
     const hurtBox = enemy.node.getComponent(HurtBox) ?? enemy.node.addComponent(HurtBox);
     hurtBox.owner = enemy;

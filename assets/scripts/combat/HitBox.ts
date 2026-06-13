@@ -19,6 +19,9 @@ import { shouldDrawSkillAreaEffect } from './CombatMath';
 
 const { ccclass, property } = _decorator;
 
+/*
+ * HitBox 管理技能判定窗口、同一技能的去重命中，以及与命中反馈特效的最小耦合。
+ */
 @ccclass('HitBox')
 export class HitBox extends Component {
   @property(Node)
@@ -43,6 +46,9 @@ export class HitBox extends Component {
     this.scanOverlappingTargets();
   }
 
+  /*
+   * 激活时立即扫描一次重叠目标，补偿 BEGIN_CONTACT 在动态开关 collider 时可能丢帧的问题。
+   */
   activate(skill: SkillConfig): void {
     this.skill = skill;
     this.hitTargets.clear();
@@ -51,6 +57,9 @@ export class HitBox extends Component {
     this.scanOverlappingTargets();
   }
 
+  /*
+   * 预览只显示需要提示的技能区域，不开启碰撞，避免技能前摇阶段提前造成伤害。
+   */
   preview(skill: SkillConfig): void {
     this.skill = skill;
     this.hitTargets.clear();
@@ -72,6 +81,9 @@ export class HitBox extends Component {
     }
   }
 
+  /*
+   * slash_wave 画成窄长剑形残影，避免普攻和技能表现退化成大矩形色块。
+   */
   private drawSkillEffect(skill: SkillConfig, active: boolean): void {
     const graphics = this.getComponent(Graphics);
     if (!graphics) {
@@ -126,6 +138,9 @@ export class HitBox extends Component {
     this.tryHitTarget(other);
   }
 
+  /*
+   * 每帧 AABB 补扫用于兜底高速位移或同帧启用碰撞时漏掉的目标。
+   */
   private scanOverlappingTargets(): void {
     if (!this.active || !this.skill) {
       return;
@@ -143,6 +158,9 @@ export class HitBox extends Component {
     });
   }
 
+  /*
+   * 同一个技能窗口内每个目标只命中一次，伤害、击退和受击火花保持原子化处理。
+   */
   private tryHitTarget(other: Collider2D): void {
     if (!this.skill) {
       return;
@@ -163,6 +181,9 @@ export class HitBox extends Component {
     }
   }
 
+  /*
+   * 命中火花挂在受击者节点上，随目标一起移动，避免世界坐标残留导致反馈错位。
+   */
   private spawnHitImpact(target: CharacterBase): void {
     const effect = new Node('HitImpact');
     effect.addComponent(UITransform).setContentSize(56, 48);
@@ -196,6 +217,9 @@ export class HitBox extends Component {
       .start();
   }
 
+  /*
+   * 兼容 HurtBox 子节点、角色根节点和父节点三种场景搭建方式，降低编辑器绑定成本。
+   */
   private resolveTarget(node: Node): CharacterBase | null {
     return node.getComponent(HurtBox)?.owner
       ?? node.getComponent(CharacterBase)

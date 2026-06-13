@@ -18,6 +18,9 @@ import {
 
 const { ccclass, property } = _decorator;
 
+/*
+ * 怪物血条作为挂载式反馈组件存在，不要求场景提前准备 HUD 子节点。
+ */
 @ccclass('EnemyHealthHud')
 export class EnemyHealthHud extends Component {
   @property
@@ -33,6 +36,9 @@ export class EnemyHealthHud extends Component {
   private barGraphics: Graphics | null = null;
   private hpLabel: Label | null = null;
 
+  /*
+   * onLoad 中订阅角色受击事件并创建 HUD 节点，兼容运行时刷怪和编辑器预摆怪物。
+   */
   onLoad(): void {
     this.owner = this.getComponent(CharacterBase);
     this.node.on(CHARACTER_DAMAGED_EVENT, this.onDamaged, this);
@@ -51,6 +57,9 @@ export class EnemyHealthHud extends Component {
     this.render();
   }
 
+  /*
+   * 血条和数值标签跟随怪物节点本地坐标，避免再维护一个全局 HUD 坐标转换层。
+   */
   private ensureHudNodes(): void {
     const barNode = new Node('EnemyHealthBar');
     barNode.setPosition(0, this.offsetY, 0);
@@ -67,6 +76,9 @@ export class EnemyHealthHud extends Component {
     barNode.addChild(labelNode);
   }
 
+  /*
+   * render 从 owner 实时读取生命值，确保受击事件漏掉时下一帧仍能自我修正。
+   */
   private render(): void {
     if (!this.owner || !this.barGraphics || !this.hpLabel) {
       return;
@@ -91,6 +103,9 @@ export class EnemyHealthHud extends Component {
     this.showFloatingDamage(event.damage);
   }
 
+  /*
+   * 浮动伤害只作为短生命周期表现节点，播放完立即销毁，避免战斗越久节点越多。
+   */
   private showFloatingDamage(damage: number): void {
     const floatNode = new Node('FloatingDamage');
     floatNode.setPosition(0, this.offsetY + 20, 0);

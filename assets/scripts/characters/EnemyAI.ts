@@ -12,6 +12,9 @@ import {
 const { ccclass, property } = _decorator;
 type EnemyState = 'idle' | 'patrol' | 'chase' | 'attack' | 'hit' | 'dead';
 
+/*
+ * 怪物 AI 负责把“感知距离、攻击距离、硬直、死亡”这些战斗状态转成动画和位移行为。
+ */
 @ccclass('EnemyAI')
 export class EnemyAI extends CharacterBase {
   @property(Node)
@@ -66,6 +69,9 @@ export class EnemyAI extends CharacterBase {
     this.attackTween?.stop();
   }
 
+  /*
+   * 状态优先级从高到低为死亡、硬直、攻击锁定、索敌追击、巡逻，防止同一帧出现行为互相覆盖。
+   */
   override update(deltaTime: number): void {
     super.update(deltaTime);
     const wasAttacking = this.attackLockTimer > 0;
@@ -119,11 +125,17 @@ export class EnemyAI extends CharacterBase {
     this.patrol(deltaTime);
   }
 
+  /*
+   * 当前巡逻只承担无目标时的占位行为，后续接入路径点时应保持与追击逻辑解耦。
+   */
   private patrol(deltaTime: number): void {
     this.stateMachine.transitionTo('patrol');
     this.moveHorizontal(this.patrolDirection * 0.35, deltaTime);
   }
 
+  /*
+   * 攻击进入锁定窗口后，位移和伤害时点都由计时器驱动，保证动画表现与判定帧可独立调参。
+   */
   private playAttack(): void {
     this.attackTimer = this.attackCooldown;
     this.attackLockTimer = this.attackLockDuration;
@@ -134,6 +146,9 @@ export class EnemyAI extends CharacterBase {
     this.playAttackMotion();
   }
 
+  /*
+   * 伤害只在指定时点触发一次；若目标已经离开近战范围，则本次挥击落空。
+   */
   private tryApplyAttackDamage(): void {
     if (!this.target) {
       return;
@@ -166,6 +181,9 @@ export class EnemyAI extends CharacterBase {
     this.faceHorizontal(deltaX);
   }
 
+  /*
+   * 死亡只处理一次：停止攻击表现、关闭碰撞，并延迟隐藏节点给死亡动画留出播放时间。
+   */
   private handleDefeated(): void {
     if (this.defeatedHandled) {
       return;
@@ -207,6 +225,9 @@ export class EnemyAI extends CharacterBase {
     }
   }
 
+  /*
+   * 敌人近战表现使用 visual root 前探和压缩缩放，避免直接移动碰撞根节点造成判定抖动。
+   */
   private playAttackMotion(): void {
     const visual = this.facingVisualRoot;
     if (!visual) {

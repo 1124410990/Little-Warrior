@@ -6,6 +6,9 @@ import { CharacterBase } from '../characters/CharacterBase';
 
 const { ccclass, property } = _decorator;
 
+/*
+ * 默认技能表服务原型期快速验证；接入 JSON 配置后仍应保持字段语义一致。
+ */
 const DEFAULT_SKILLS: Record<string, SkillConfig> = {
   basic_1: { id: 'basic_1', displayName: '普攻一段', animationName: 'player_attack_1', attack: 28, skillPower: 1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 18, hitStun: 0.18 },
   basic_2: { id: 'basic_2', displayName: '普攻二段', animationName: 'player_attack_2', attack: 32, skillPower: 1.1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 22, hitStun: 0.2 },
@@ -19,6 +22,9 @@ interface ActiveSkillWindow {
   activated: boolean;
 }
 
+/*
+ * SkillComponent 负责冷却、判定窗口和攻击框朝向，具体命中结果由 HitBox 处理。
+ */
 @ccclass('SkillComponent')
 export class SkillComponent extends Component {
   @property(HitBox)
@@ -31,6 +37,9 @@ export class SkillComponent extends Component {
   private activeWindow: ActiveSkillWindow | null = null;
   private skills: Record<string, SkillConfig> = DEFAULT_SKILLS;
 
+  /*
+   * 技能窗口按 activeStart/activeEnd 开关 HitBox，让动画前摇、命中帧和收招可以独立配置。
+   */
   tick(deltaTime: number): void {
     this.cooldowns.forEach((value, key) => this.cooldowns.set(key, Math.max(0, value - deltaTime)));
 
@@ -55,6 +64,9 @@ export class SkillComponent extends Component {
     return (this.cooldowns.get(skillId) ?? 0) <= 0 && Boolean(this.skills[skillId]);
   }
 
+  /*
+   * 释放技能时同步攻击框位置和镜像，保证角色朝向、visual root 翻转与判定方向一致。
+   */
   cast(skillId: string, facing: number): boolean {
     if (!this.canCast(skillId)) {
       return false;
