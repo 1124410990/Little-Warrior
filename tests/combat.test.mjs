@@ -20,6 +20,7 @@ import { StateMachine } from '../assets/scripts/core/StateMachine.ts';
 import {
   DEFAULT_INPUT_BINDINGS,
   getCombatActionFromInput,
+  getInputCodeFromKeyCode,
   getFacingFromHorizontalInput,
   normalizeMoveVector,
   resolveMoveVector,
@@ -91,6 +92,13 @@ assert.equal(DEFAULT_INPUT_BINDINGS.smallSkill, 'KeyZ');
 assert.equal(getCombatActionFromInput('KeyX'), 'basicAttack');
 assert.equal(getCombatActionFromInput('KeyZ'), 'smallSkill');
 assert.equal(getCombatActionFromInput('ArrowLeft'), null);
+assert.equal(getInputCodeFromKeyCode(38), 'ArrowUp');
+assert.equal(getInputCodeFromKeyCode(40), 'ArrowDown');
+assert.equal(getInputCodeFromKeyCode(37), 'ArrowLeft');
+assert.equal(getInputCodeFromKeyCode(39), 'ArrowRight');
+assert.equal(getInputCodeFromKeyCode(88), 'KeyX');
+assert.equal(getInputCodeFromKeyCode(90), 'KeyZ');
+assert.equal(getInputCodeFromKeyCode(13), null);
 
 assert.equal(PLAYER_PIXEL_PARTS.some((part) => part.name === 'Sword'), true);
 assert.equal(PLAYER_PIXEL_PARTS.some((part) => part.name === 'Cape'), true);

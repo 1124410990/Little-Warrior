@@ -1,10 +1,11 @@
-﻿import { _decorator, Animation, Component, input, Input, KeyCode, EventKeyboard, Node, Tween, tween, Vec3 } from 'cc';
+﻿import { _decorator, Animation, input, Input, EventKeyboard, Node, Tween, tween, Vec3 } from 'cc';
 import { StateMachine } from '../core/StateMachine';
 import { CharacterBase } from './CharacterBase';
 import { SkillComponent } from '../skills/SkillComponent';
 import { resolveWeaponSlashPose, resolveWeaponThrustPose } from '../combat/CombatMath';
 import {
   getCombatActionFromInput,
+  getInputCodeFromKeyCode,
   resolveMoveVector,
   type MoveVector,
 } from '../input/KeyboardMapping';
@@ -87,7 +88,7 @@ export class PlayerController extends CharacterBase {
    * 按键按下时优先处理战斗动作，移动方向则保留在 pressedCodes 中由每帧统一解析。
    */
   private onKeyDown(event: EventKeyboard): void {
-    const code = this.toInputCode(event.keyCode);
+    const code = getInputCodeFromKeyCode(event.keyCode);
     if (!code) {
       return;
     }
@@ -106,7 +107,7 @@ export class PlayerController extends CharacterBase {
   }
 
   private onKeyUp(event: EventKeyboard): void {
-    const code = this.toInputCode(event.keyCode);
+    const code = getInputCodeFromKeyCode(event.keyCode);
     if (code) {
       this.pressedCodes.delete(code);
     }
@@ -114,25 +115,6 @@ export class PlayerController extends CharacterBase {
 
   private getMoveVector(): MoveVector {
     return resolveMoveVector(this.pressedCodes);
-  }
-
-  private toInputCode(keyCode: KeyCode): string | null {
-    switch (keyCode) {
-      case KeyCode.ARROW_UP:
-        return 'ArrowUp';
-      case KeyCode.ARROW_DOWN:
-        return 'ArrowDown';
-      case KeyCode.ARROW_LEFT:
-        return 'ArrowLeft';
-      case KeyCode.ARROW_RIGHT:
-        return 'ArrowRight';
-      case KeyCode.KEY_X:
-        return 'KeyX';
-      case KeyCode.KEY_Z:
-        return 'KeyZ';
-      default:
-        return null;
-    }
   }
 
   /*

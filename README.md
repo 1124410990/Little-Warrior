@@ -34,6 +34,7 @@
 - 方向键：上下左右移动
 - `X`：普攻，支持三段连击
 - `Z`：释放小技能 `疾风刺`
+- 默认键位配置见 `assets/resources/config/input.json`，运行时按键语义统一由 `assets/scripts/input/KeyboardMapping.ts` 解析。
 
 ## 本地逻辑测试
 
