@@ -36,3 +36,17 @@ export interface EnemyConfig extends CharacterStats {
   attackRange: number;
   attackCooldown: number;
 }
+
+export interface RoomSpawnPointConfig {
+  x: number;
+  y: number;
+  z?: number;
+}
+
+export interface RoomConfig {
+  roomId: string;
+  displayName: string;
+  enemyPrefab: string;
+  spawnPoints: RoomSpawnPointConfig[];
+  clearMessage: string;
+}

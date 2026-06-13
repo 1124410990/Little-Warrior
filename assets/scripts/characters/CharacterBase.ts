@@ -2,6 +2,8 @@
 import { CharacterStats } from '../core/GameTypes';
 import { canHitTarget, calculateDamage, DamageInput } from '../combat/CombatMath';
 import { getFacingFromHorizontalInput, normalizeMoveVector, type MoveVector } from '../input/KeyboardMapping';
+import { getCharacterConfig } from '../core/GameConfig';
+import { loadCharacterConfigs } from '../core/RuntimeGameConfig';
 
 const { ccclass, property } = _decorator;
 
@@ -51,6 +53,9 @@ export class CharacterBase extends Component {
   @property
   invulnerableTime = 0.1;
 
+  @property
+  autoLoadConfig = true;
+
   @property(Node)
   facingVisualRoot: Node | null = null;
 
@@ -63,6 +68,9 @@ export class CharacterBase extends Component {
 
   start(): void {
     this.hp = this.maxHp;
+    if (this.autoLoadConfig && this.characterId) {
+      void this.loadStatsFromConfig();
+    }
   }
 
   update(deltaTime: number): void {
@@ -80,6 +88,19 @@ export class CharacterBase extends Component {
     this.hitStun = stats.hitStun;
     this.invulnerableTime = stats.invulnerableTime;
     this.hp = stats.maxHp;
+  }
+
+  async loadStatsFromConfig(): Promise<void> {
+    if (!this.characterId) {
+      return;
+    }
+
+    try {
+      const configs = await loadCharacterConfigs();
+      this.applyStats(getCharacterConfig(configs, this.characterId));
+    } catch (error) {
+      console.warn(`[CharacterBase] 读取角色配置失败，保留编辑器字段: ${this.characterId}`, error);
+    }
   }
 
   /*
