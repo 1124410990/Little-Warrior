@@ -23,6 +23,19 @@ export const DEFAULT_INPUT_BINDINGS: InputBindings = {
   smallSkill: 'KeyZ',
 };
 
+const COCOS_KEY_CODE_TO_INPUT_CODE: Record<number, string> = {
+  37: 'ArrowLeft',
+  38: 'ArrowUp',
+  39: 'ArrowRight',
+  40: 'ArrowDown',
+  88: 'KeyX',
+  90: 'KeyZ',
+};
+
+export function getInputCodeFromKeyCode(keyCode: number): string | null {
+  return COCOS_KEY_CODE_TO_INPUT_CODE[keyCode] ?? null;
+}
+
 /*
  * 输入层只产出轴向意图，不直接移动节点，便于后续替换手柄或自定义键位。
  */

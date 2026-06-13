@@ -6,7 +6,8 @@
   "description": "Cocos Creator 3.8 TypeScript side-scrolling combat demo.",
   "littleWarriorVersion": "0.1.0",
   "scripts": {
-    "test": "node ./tests/combat.test.mjs"
+    "test": "node ./tests/combat.test.mjs",
+    "verify:training-room": "node ./scripts/verify-training-room.mjs"
   },
   "devDependencies": {},
   "creator": {

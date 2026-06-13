@@ -3,18 +3,11 @@ import { SkillConfig } from '../core/GameTypes';
 import { HitBox } from '../combat/HitBox';
 import { resolveAttackBoxOffset } from '../combat/CombatMath';
 import { CharacterBase } from '../characters/CharacterBase';
+import type { SkillConfigMap } from '../core/GameConfig';
+import { getSkillConfig } from '../core/GameConfig';
+import { loadSkillConfigs } from '../core/RuntimeGameConfig';
 
 const { ccclass, property } = _decorator;
-
-/*
- * 默认技能表服务原型期快速验证；接入 JSON 配置后仍应保持字段语义一致。
- */
-const DEFAULT_SKILLS: Record<string, SkillConfig> = {
-  basic_1: { id: 'basic_1', displayName: '普攻一段', animationName: 'player_attack_1', attack: 28, skillPower: 1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 18, hitStun: 0.18 },
-  basic_2: { id: 'basic_2', displayName: '普攻二段', animationName: 'player_attack_2', attack: 32, skillPower: 1.1, cooldown: 0.18, activeStart: 0.08, activeEnd: 0.16, knockback: 22, hitStun: 0.2 },
-  basic_3: { id: 'basic_3', displayName: '普攻三段', animationName: 'player_attack_3', attack: 42, skillPower: 1.25, cooldown: 0.3, activeStart: 0.1, activeEnd: 0.2, knockback: 38, hitStun: 0.28 },
-  slash_wave: { id: 'slash_wave', displayName: '疾风刺', animationName: 'player_skill_slash_wave', attack: 60, skillPower: 1.8, cooldown: 3, activeStart: 0.12, activeEnd: 0.34, knockback: 64, hitStun: 0.38 },
-};
 
 interface ActiveSkillWindow {
   skill: SkillConfig;
@@ -33,9 +26,30 @@ export class SkillComponent extends Component {
   @property(Node)
   hitBoxRoot: Node | null = null;
 
+  @property
+  autoLoadConfig = true;
+
   private readonly cooldowns = new Map<string, number>();
   private activeWindow: ActiveSkillWindow | null = null;
-  private skills: Record<string, SkillConfig> = DEFAULT_SKILLS;
+  private skills: SkillConfigMap = {};
+
+  start(): void {
+    if (this.autoLoadConfig) {
+      void this.loadSkillsFromConfig();
+    }
+  }
+
+  applySkills(skills: SkillConfigMap): void {
+    this.skills = { ...skills };
+  }
+
+  async loadSkillsFromConfig(): Promise<void> {
+    try {
+      this.applySkills(await loadSkillConfigs());
+    } catch (error) {
+      console.warn('[SkillComponent] 读取技能配置失败，保留当前技能表', error);
+    }
+  }
 
   /*
    * 技能窗口按 activeStart/activeEnd 开关 HitBox，让动画前摇、命中帧和收招可以独立配置。
@@ -61,7 +75,16 @@ export class SkillComponent extends Component {
   }
 
   canCast(skillId: string): boolean {
-    return (this.cooldowns.get(skillId) ?? 0) <= 0 && Boolean(this.skills[skillId]);
+    if ((this.cooldowns.get(skillId) ?? 0) > 0) {
+      return false;
+    }
+
+    try {
+      getSkillConfig(this.skills, skillId);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /*
@@ -72,7 +95,7 @@ export class SkillComponent extends Component {
       return false;
     }
 
-    const skill = this.skills[skillId];
+    const skill = getSkillConfig(this.skills, skillId);
     this.cooldowns.set(skillId, skill.cooldown);
     this.activeWindow = { skill, elapsed: 0, activated: false };
     if (this.hitBoxRoot) {
@@ -87,10 +110,13 @@ export class SkillComponent extends Component {
   }
 
   getCooldownRatio(skillId: string): number {
-    const skill = this.skills[skillId];
-    if (!skill) {
+    let skill: SkillConfig;
+    try {
+      skill = getSkillConfig(this.skills, skillId);
+    } catch {
       return 0;
     }
+
     return Math.min(1, (this.cooldowns.get(skillId) ?? 0) / skill.cooldown);
   }
 }

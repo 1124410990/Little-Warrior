@@ -1,6 +1,8 @@
 import { _decorator, Animation, Collider2D, Node, Tween, tween, Vec3 } from 'cc';
 import { StateMachine } from '../core/StateMachine';
 import { CharacterBase } from './CharacterBase';
+import type { CharacterStats } from '../core/GameTypes';
+import { isEnemyConfig } from '../core/GameConfig';
 import {
   getChaseVector,
   resolveMeleeLungePose,
@@ -63,6 +65,17 @@ export class EnemyAI extends CharacterBase {
       hit: { enter: (ctx) => ctx.playAnimation('enemy_hit') },
       dead: { enter: (ctx) => ctx.playAnimation('enemy_dead') },
     }, 'idle');
+  }
+
+  override applyStats(stats: CharacterStats): void {
+    super.applyStats(stats);
+    if (!isEnemyConfig(stats)) {
+      return;
+    }
+
+    this.aggroRange = stats.aggroRange;
+    this.attackRange = stats.attackRange;
+    this.attackCooldown = stats.attackCooldown;
   }
 
   protected onDestroy(): void {

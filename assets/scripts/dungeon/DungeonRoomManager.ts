@@ -3,6 +3,10 @@ import { EnemyAI } from '../characters/EnemyAI';
 import { resolveSeparationOffset } from '../combat/CombatMath';
 import { HurtBox } from '../combat/HurtBox';
 import { EnemyHealthHud } from '../ui/EnemyHealthHud';
+import { Vec3 } from 'cc';
+import type { EnemyConfig, RoomConfig } from '../core/GameTypes';
+import { getEnemyConfig, resolveRoomSpawnPositions } from '../core/GameConfig';
+import { loadCharacterConfigs, loadTrainingRoomConfig } from '../core/RuntimeGameConfig';
 
 const { ccclass, property } = _decorator;
 
@@ -29,10 +33,25 @@ export class DungeonRoomManager extends Component {
   @property
   enemySeparationStrength = 0.45;
 
+  @property
+  autoLoadConfig = true;
+
   private readonly enemies: EnemyAI[] = [];
   private cleared = false;
+  private roomConfig: RoomConfig | null = null;
+  private enemyConfig: EnemyConfig | null = null;
+  private configuredSpawnPositions: Vec3[] = [];
+  private clearMessage = '通关！';
 
   start(): void {
+    void this.initializeRoom();
+  }
+
+  private async initializeRoom(): Promise<void> {
+    if (this.autoLoadConfig) {
+      await this.loadRoomRuntimeConfig();
+    }
+
     if (this.enemies.length === 0) {
       this.spawnWave();
     }
@@ -51,8 +70,19 @@ export class DungeonRoomManager extends Component {
     this.separateAliveEnemies(aliveEnemies);
     if (this.enemies.length > 0 && aliveEnemies.length === 0) {
       this.cleared = true;
-      this.showMessage('通关！');
+      this.showMessage(this.clearMessage);
     }
+  }
+
+  applyRoomConfig(roomConfig: RoomConfig): void {
+    this.roomConfig = roomConfig;
+    this.configuredSpawnPositions = resolveRoomSpawnPositions(roomConfig)
+      .map((point) => new Vec3(point.x, point.y, point.z));
+    this.clearMessage = roomConfig.clearMessage;
+  }
+
+  applyEnemyConfig(enemyConfig: EnemyConfig): void {
+    this.enemyConfig = enemyConfig;
   }
 
   /*
@@ -64,12 +94,24 @@ export class DungeonRoomManager extends Component {
       return;
     }
 
-    this.spawnPoints.forEach((spawnPoint) => {
+    const spawnPlan = this.resolveSpawnPlan();
+    if (spawnPlan.positions.length === 0) {
+      this.showMessage('请配置刷怪点');
+      return;
+    }
+
+    spawnPlan.positions.forEach((position) => {
       const enemyNode = instantiate(this.enemyPrefab!);
       enemyNode.setParent(this.node);
-      enemyNode.setWorldPosition(spawnPoint.worldPosition);
+      if (spawnPlan.useWorldPosition) {
+        enemyNode.setWorldPosition(position);
+      } else {
+        enemyNode.setPosition(position);
+      }
+
       const enemyAI = enemyNode.getComponent(EnemyAI);
       if (enemyAI) {
+        this.applyEnemyRuntimeConfig(enemyAI);
         this.prepareEnemyFeedback(enemyAI);
         enemyAI.target = this.player;
         this.enemies.push(enemyAI);
@@ -81,6 +123,7 @@ export class DungeonRoomManager extends Component {
    * 程序化搭建场景时使用注册入口，避免重复维护预制体和代码生成两套初始化逻辑。
    */
   registerEnemy(enemy: EnemyAI): void {
+    this.applyEnemyRuntimeConfig(enemy);
     this.prepareEnemyFeedback(enemy);
     enemy.target = this.player;
     this.enemies.push(enemy);
@@ -120,6 +163,42 @@ export class DungeonRoomManager extends Component {
       position.y += offset.y * this.enemySeparationStrength;
       enemy.node.setPosition(position);
     });
+  }
+
+  private async loadRoomRuntimeConfig(): Promise<void> {
+    try {
+      const [roomConfig, characterConfigs] = await Promise.all([
+        loadTrainingRoomConfig(),
+        loadCharacterConfigs(),
+      ]);
+      this.applyRoomConfig(roomConfig);
+      this.applyEnemyConfig(getEnemyConfig(characterConfigs, roomConfig.enemyPrefab));
+    } catch (error) {
+      console.warn('[DungeonRoomManager] 读取房间配置失败，保留编辑器字段', error);
+    }
+  }
+
+  private resolveSpawnPlan(): { positions: Vec3[]; useWorldPosition: boolean } {
+    if (this.configuredSpawnPositions.length > 0) {
+      return { positions: this.configuredSpawnPositions, useWorldPosition: false };
+    }
+
+    return {
+      positions: this.spawnPoints.map((spawnPoint) => spawnPoint.worldPosition.clone()),
+      useWorldPosition: true,
+    };
+  }
+
+  private applyEnemyRuntimeConfig(enemy: EnemyAI): void {
+    if (this.enemyConfig) {
+      enemy.autoLoadConfig = false;
+      enemy.applyStats(this.enemyConfig);
+      return;
+    }
+
+    if (this.roomConfig?.enemyPrefab) {
+      enemy.characterId = this.roomConfig.enemyPrefab;
+    }
   }
 
   /*

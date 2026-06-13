@@ -32,6 +32,8 @@ import {
   type PixelColor,
   type PixelPart,
 } from './PixelArtBlueprint';
+import { getCharacterConfig, getEnemyConfig, resolveRoomSpawnPositions } from '../core/GameConfig';
+import { loadRuntimeGameConfig, type RuntimeGameConfig } from '../core/RuntimeGameConfig';
 
 const { ccclass, property } = _decorator;
 
@@ -43,15 +45,22 @@ export class TrainingRoomBootstrap extends Component {
   @property
   rebuildOnStart = true;
 
+  private runtimeConfig: RuntimeGameConfig | null = null;
+
   /*
    * 已存在 Canvas 时跳过重建，避免编辑器手工搭建内容在预览启动时被重复创建。
    */
   start(): void {
+    void this.bootstrapRoom();
+  }
+
+  private async bootstrapRoom(): Promise<void> {
     if (!this.rebuildOnStart || this.node.getChildByName('Canvas')) {
       return;
     }
 
     this.setupPhysics();
+    await this.loadRuntimeConfig();
 
     const room = this.node.addComponent(DungeonRoomManager);
     const canvas = this.createCanvas();
@@ -63,7 +72,21 @@ export class TrainingRoomBootstrap extends Component {
 
     room.player = player.node;
     room.messageLabel = hud.messageLabel;
+    if (this.runtimeConfig) {
+      const enemyConfig = getEnemyConfig(this.runtimeConfig.characters, this.runtimeConfig.room.enemyPrefab);
+      room.autoLoadConfig = false;
+      room.applyRoomConfig(this.runtimeConfig.room);
+      room.applyEnemyConfig(enemyConfig);
+    }
     this.createEnemies(canvas, room, player.node);
+  }
+
+  private async loadRuntimeConfig(): Promise<void> {
+    try {
+      this.runtimeConfig = await loadRuntimeGameConfig();
+    } catch (error) {
+      console.warn('[TrainingRoomBootstrap] 读取运行时配置失败，保留组件默认值', error);
+    }
   }
 
   /*
@@ -135,13 +158,10 @@ export class TrainingRoomBootstrap extends Component {
     controller.facingVisualRoot = playerActor.visual;
     controller.weaponPivot = playerActor.weaponPivot;
     controller.characterId = 'player_warrior';
-    controller.displayName = '小勇士';
-    controller.maxHp = 320;
-    controller.attack = 36;
-    controller.defense = 8;
-    controller.moveSpeed = 260;
-    controller.hitStun = 0.22;
-    controller.invulnerableTime = 0.12;
+    if (this.runtimeConfig) {
+      controller.autoLoadConfig = false;
+      controller.applyStats(getCharacterConfig(this.runtimeConfig.characters, controller.characterId));
+    }
 
     this.addBodyCollider(player, new Size(48, 90), new Vec2(0, 0), false);
 
@@ -163,6 +183,10 @@ export class TrainingRoomBootstrap extends Component {
 
     skills.hitBox = hitBox;
     skills.hitBoxRoot = hitBoxRoot;
+    if (this.runtimeConfig) {
+      skills.autoLoadConfig = false;
+      skills.applySkills(this.runtimeConfig.skills);
+    }
     controller.skillComponent = skills;
 
     return { node: player, controller, skills };
@@ -172,11 +196,17 @@ export class TrainingRoomBootstrap extends Component {
    * 程序化敌人用于训练房固定波次，所有怪物都指向同一个玩家目标。
    */
   private createEnemies(parent: Node, room: DungeonRoomManager, player: Node): void {
-    const spawnPoints = [
-      new Vec3(-120, -80, 0),
-      new Vec3(80, -140, 0),
-      new Vec3(280, -100, 0),
-    ];
+    const spawnPoints = this.runtimeConfig
+      ? resolveRoomSpawnPositions(this.runtimeConfig.room).map((point) => new Vec3(point.x, point.y, point.z))
+      : [
+        new Vec3(-120, -80, 0),
+        new Vec3(80, -140, 0),
+        new Vec3(280, -100, 0),
+      ];
+    const enemyId = this.runtimeConfig?.room.enemyPrefab ?? 'enemy_slime';
+    const enemyConfig = this.runtimeConfig
+      ? getEnemyConfig(this.runtimeConfig.characters, enemyId)
+      : null;
 
     spawnPoints.forEach((position, index) => {
       const enemyActor = this.createActorNode(`Enemy_Slime_${index + 1}`, SLIME_PIXEL_PARTS);
@@ -187,17 +217,11 @@ export class TrainingRoomBootstrap extends Component {
 
       const ai = enemy.addComponent(EnemyAI);
       ai.facingVisualRoot = enemyActor.visual;
-      ai.characterId = 'enemy_slime';
-      ai.displayName = '训练史莱姆';
-      ai.maxHp = 120;
-      ai.attack = 18;
-      ai.defense = 3;
-      ai.moveSpeed = 85;
-      ai.hitStun = 0.2;
-      ai.invulnerableTime = 0.08;
-      ai.aggroRange = 360;
-      ai.attackRange = 96;
-      ai.attackCooldown = 1.35;
+      ai.characterId = enemyId;
+      if (enemyConfig) {
+        ai.autoLoadConfig = false;
+        ai.applyStats(enemyConfig);
+      }
       ai.attackWindup = 0.28;
       ai.attackDamageMoment = 0.22;
       ai.attackLockDuration = 0.55;

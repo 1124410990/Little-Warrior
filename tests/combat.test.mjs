@@ -18,8 +18,15 @@ import {
 import { readFileSync } from 'node:fs';
 import { StateMachine } from '../assets/scripts/core/StateMachine.ts';
 import {
+  getCharacterConfig,
+  getEnemyConfig,
+  getSkillConfig,
+  resolveRoomSpawnPositions,
+} from '../assets/scripts/core/GameConfig.ts';
+import {
   DEFAULT_INPUT_BINDINGS,
   getCombatActionFromInput,
+  getInputCodeFromKeyCode,
   getFacingFromHorizontalInput,
   normalizeMoveVector,
   resolveMoveVector,
@@ -72,6 +79,46 @@ const characterConfig = JSON.parse(characterConfigText);
 assert.equal(characterConfig.enemy_slime.moveSpeed, 85);
 assert.equal(characterConfig.enemy_slime.attackRange, 96);
 assert.equal(characterConfig.enemy_slime.attackCooldown, 1.35);
+const skillConfigText = readFileSync(new URL('../assets/resources/config/skills.json', import.meta.url), 'utf8').replace(/^\uFEFF/, '');
+const skillConfig = JSON.parse(skillConfigText);
+const roomConfigText = readFileSync(new URL('../assets/resources/config/room_training_01.json', import.meta.url), 'utf8').replace(/^\uFEFF/, '');
+const roomConfig = JSON.parse(roomConfigText);
+
+const playerConfig = getCharacterConfig(characterConfig, 'player_warrior');
+const enemyConfig = getEnemyConfig(characterConfig, roomConfig.enemyPrefab);
+const slashWave = getSkillConfig(skillConfig, 'slash_wave');
+assert.equal(playerConfig.attack, 36);
+assert.equal(enemyConfig.attackRange, 96);
+assert.equal(calculateDamage({ attack: slashWave.attack, defense: enemyConfig.defense, skillPower: slashWave.skillPower }), 103);
+
+const tunedSkills = {
+  ...skillConfig,
+  slash_wave: {
+    ...slashWave,
+    attack: slashWave.attack + 20,
+  },
+};
+const tunedSlashWave = getSkillConfig(tunedSkills, 'slash_wave');
+assert.equal(calculateDamage({ attack: tunedSlashWave.attack, defense: enemyConfig.defense, skillPower: tunedSlashWave.skillPower }), 139);
+
+assert.deepEqual(resolveRoomSpawnPositions(roomConfig), [
+  { x: 360, y: -80, z: 0 },
+  { x: 560, y: -140, z: 0 },
+  { x: 760, y: -100, z: 0 },
+]);
+const movedRoom = {
+  ...roomConfig,
+  spawnPoints: [
+    { x: 12, y: -34 },
+    { x: 90, y: -45, z: 2 },
+  ],
+};
+assert.deepEqual(resolveRoomSpawnPositions(movedRoom), [
+  { x: 12, y: -34, z: 0 },
+  { x: 90, y: -45, z: 2 },
+]);
+assert.throws(() => getSkillConfig(skillConfig, 'missing_skill'), /缺少技能配置: missing_skill/);
+assert.throws(() => getEnemyConfig(characterConfig, 'player_warrior'), /缺少敌人配置: player_warrior/);
 
 assert.equal(canHitTarget({ hp: 10, invulnerableUntil: 0 }, 0.2), true);
 assert.equal(canHitTarget({ hp: 0, invulnerableUntil: 0 }, 0.2), false);
@@ -91,6 +138,13 @@ assert.equal(DEFAULT_INPUT_BINDINGS.smallSkill, 'KeyZ');
 assert.equal(getCombatActionFromInput('KeyX'), 'basicAttack');
 assert.equal(getCombatActionFromInput('KeyZ'), 'smallSkill');
 assert.equal(getCombatActionFromInput('ArrowLeft'), null);
+assert.equal(getInputCodeFromKeyCode(38), 'ArrowUp');
+assert.equal(getInputCodeFromKeyCode(40), 'ArrowDown');
+assert.equal(getInputCodeFromKeyCode(37), 'ArrowLeft');
+assert.equal(getInputCodeFromKeyCode(39), 'ArrowRight');
+assert.equal(getInputCodeFromKeyCode(88), 'KeyX');
+assert.equal(getInputCodeFromKeyCode(90), 'KeyZ');
+assert.equal(getInputCodeFromKeyCode(13), null);
 
 assert.equal(PLAYER_PIXEL_PARTS.some((part) => part.name === 'Sword'), true);
 assert.equal(PLAYER_PIXEL_PARTS.some((part) => part.name === 'Cape'), true);
