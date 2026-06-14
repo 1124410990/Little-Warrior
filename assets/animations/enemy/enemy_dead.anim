@@ -1,0 +1,59 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "enemy_dead",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 1,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "6ab3d7ad-2929-43e1-ac45-3f7a06ff6d0c@xuptc"
+              }
+            },
+            {
+              "frame": 0.125,
+              "value": {
+                "__uuid__": "6ab3d7ad-2929-43e1-ac45-3f7a06ff6d0c@sc9gp"
+              }
+            },
+            {
+              "frame": 0.25,
+              "value": {
+                "__uuid__": "6ab3d7ad-2929-43e1-ac45-3f7a06ff6d0c@lbndt"
+              }
+            },
+            {
+              "frame": 0.375,
+              "value": {
+                "__uuid__": "6ab3d7ad-2929-43e1-ac45-3f7a06ff6d0c@r4ytl"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

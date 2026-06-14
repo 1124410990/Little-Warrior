@@ -1,0 +1,65 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "player_dead",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.625,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 1,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "7afc8f3f-c326-4a82-af1e-2ffa3b1eafa0@2wwu2"
+              }
+            },
+            {
+              "frame": 0.125,
+              "value": {
+                "__uuid__": "7afc8f3f-c326-4a82-af1e-2ffa3b1eafa0@6bl48"
+              }
+            },
+            {
+              "frame": 0.25,
+              "value": {
+                "__uuid__": "7afc8f3f-c326-4a82-af1e-2ffa3b1eafa0@2sd1q"
+              }
+            },
+            {
+              "frame": 0.375,
+              "value": {
+                "__uuid__": "7afc8f3f-c326-4a82-af1e-2ffa3b1eafa0@w96cw"
+              }
+            },
+            {
+              "frame": 0.5,
+              "value": {
+                "__uuid__": "7afc8f3f-c326-4a82-af1e-2ffa3b1eafa0@i3y4v"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

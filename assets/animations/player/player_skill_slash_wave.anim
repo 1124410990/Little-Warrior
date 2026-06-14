@@ -1,0 +1,65 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "player_skill_slash_wave",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5,
+  "sample": 10,
+  "speed": 1,
+  "wrapMode": 1,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "9051ff09-bf74-4b1b-a6d4-1eef28240e7b@oal7y"
+              }
+            },
+            {
+              "frame": 0.1,
+              "value": {
+                "__uuid__": "9051ff09-bf74-4b1b-a6d4-1eef28240e7b@7aoox"
+              }
+            },
+            {
+              "frame": 0.2,
+              "value": {
+                "__uuid__": "9051ff09-bf74-4b1b-a6d4-1eef28240e7b@dt6xy"
+              }
+            },
+            {
+              "frame": 0.3,
+              "value": {
+                "__uuid__": "9051ff09-bf74-4b1b-a6d4-1eef28240e7b@0b8ow"
+              }
+            },
+            {
+              "frame": 0.4,
+              "value": {
+                "__uuid__": "9051ff09-bf74-4b1b-a6d4-1eef28240e7b@u7zfv"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

@@ -1,0 +1,53 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "enemy_idle",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.375,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 2,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "b175db18-1067-4605-a809-73bc1c8876c6@i2w10"
+              }
+            },
+            {
+              "frame": 0.125,
+              "value": {
+                "__uuid__": "b175db18-1067-4605-a809-73bc1c8876c6@vuq9z"
+              }
+            },
+            {
+              "frame": 0.25,
+              "value": {
+                "__uuid__": "b175db18-1067-4605-a809-73bc1c8876c6@t91cs"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

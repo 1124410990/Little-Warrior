@@ -1,0 +1,59 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "player_idle",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 2,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "e646f012-e514-49bc-8287-c9f1b47e4b5f@vrp69"
+              }
+            },
+            {
+              "frame": 0.125,
+              "value": {
+                "__uuid__": "e646f012-e514-49bc-8287-c9f1b47e4b5f@1u25m"
+              }
+            },
+            {
+              "frame": 0.25,
+              "value": {
+                "__uuid__": "e646f012-e514-49bc-8287-c9f1b47e4b5f@vw7m6"
+              }
+            },
+            {
+              "frame": 0.375,
+              "value": {
+                "__uuid__": "e646f012-e514-49bc-8287-c9f1b47e4b5f@dp6g7"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

@@ -1,0 +1,59 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "enemy_walk",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.4,
+  "sample": 10,
+  "speed": 1,
+  "wrapMode": 2,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "67770640-5830-4657-94a8-f5c649230194@du8o5"
+              }
+            },
+            {
+              "frame": 0.1,
+              "value": {
+                "__uuid__": "67770640-5830-4657-94a8-f5c649230194@mte09"
+              }
+            },
+            {
+              "frame": 0.2,
+              "value": {
+                "__uuid__": "67770640-5830-4657-94a8-f5c649230194@yei9s"
+              }
+            },
+            {
+              "frame": 0.3,
+              "value": {
+                "__uuid__": "67770640-5830-4657-94a8-f5c649230194@9v2f0"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

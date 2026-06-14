@@ -1,0 +1,53 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "player_hit",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.3,
+  "sample": 10,
+  "speed": 1,
+  "wrapMode": 1,
+  "enableTrsBlending": false,
+  "_keys": [
+    [
+      {
+        "frame": 0,
+        "value": 0
+      }
+    ]
+  ],
+  "_tracks": [
+    {
+      "path": [
+        ""
+      ],
+      "proxy": null,
+      "channels": [
+        {
+          "keys": [
+            {
+              "frame": 0,
+              "value": {
+                "__uuid__": "5977c585-662a-41f7-86c3-a9fb4a64d69a@j4vbt"
+              }
+            },
+            {
+              "frame": 0.1,
+              "value": {
+                "__uuid__": "5977c585-662a-41f7-86c3-a9fb4a64d69a@fexb6"
+              }
+            },
+            {
+              "frame": 0.2,
+              "value": {
+                "__uuid__": "5977c585-662a-41f7-86c3-a9fb4a64d69a@zi2cs"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "_exoticAnimation": null,
+  "_events": []
+}

@@ -8,6 +8,374 @@
     ".png"
   ],
   "subMetas": {
+    "du8o5": {
+      "importer": "sprite-frame",
+      "uuid": "67770640-5830-4657-94a8-f5c649230194@du8o5",
+      "displayName": "enemy_slime_walk_0",
+      "id": "du8o5",
+      "name": "spriteFrame_0",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 2172,
+        "height": 724,
+        "rawWidth": 2172,
+        "rawHeight": 724,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -1086,
+            -362,
+            0,
+            1086,
+            -362,
+            0,
+            -1086,
+            362,
+            0,
+            1086,
+            362,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            724,
+            2172,
+            724,
+            0,
+            0,
+            2172,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -1086,
+            -362,
+            0
+          ],
+          "maxPos": [
+            1086,
+            362,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "67770640-5830-4657-94a8-f5c649230194@6c48a",
+        "atlasUuid": "",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "mte09": {
+      "importer": "sprite-frame",
+      "uuid": "67770640-5830-4657-94a8-f5c649230194@mte09",
+      "displayName": "enemy_slime_walk_1",
+      "id": "mte09",
+      "name": "spriteFrame_1",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 2172,
+        "height": 724,
+        "rawWidth": 2172,
+        "rawHeight": 724,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -1086,
+            -362,
+            0,
+            1086,
+            -362,
+            0,
+            -1086,
+            362,
+            0,
+            1086,
+            362,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            724,
+            2172,
+            724,
+            0,
+            0,
+            2172,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -1086,
+            -362,
+            0
+          ],
+          "maxPos": [
+            1086,
+            362,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "67770640-5830-4657-94a8-f5c649230194@6c48a",
+        "atlasUuid": "",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "yei9s": {
+      "importer": "sprite-frame",
+      "uuid": "67770640-5830-4657-94a8-f5c649230194@yei9s",
+      "displayName": "enemy_slime_walk_2",
+      "id": "yei9s",
+      "name": "spriteFrame_2",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 2172,
+        "height": 724,
+        "rawWidth": 2172,
+        "rawHeight": 724,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -1086,
+            -362,
+            0,
+            1086,
+            -362,
+            0,
+            -1086,
+            362,
+            0,
+            1086,
+            362,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            724,
+            2172,
+            724,
+            0,
+            0,
+            2172,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -1086,
+            -362,
+            0
+          ],
+          "maxPos": [
+            1086,
+            362,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "67770640-5830-4657-94a8-f5c649230194@6c48a",
+        "atlasUuid": "",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "9v2f0": {
+      "importer": "sprite-frame",
+      "uuid": "67770640-5830-4657-94a8-f5c649230194@9v2f0",
+      "displayName": "enemy_slime_walk_3",
+      "id": "9v2f0",
+      "name": "spriteFrame_3",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 2172,
+        "height": 724,
+        "rawWidth": 2172,
+        "rawHeight": 724,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -1086,
+            -362,
+            0,
+            1086,
+            -362,
+            0,
+            -1086,
+            362,
+            0,
+            1086,
+            362,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            724,
+            2172,
+            724,
+            0,
+            0,
+            2172,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -1086,
+            -362,
+            0
+          ],
+          "maxPos": [
+            1086,
+            362,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "67770640-5830-4657-94a8-f5c649230194@6c48a",
+        "atlasUuid": "",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "6c48a": {
       "importer": "texture",
       "uuid": "67770640-5830-4657-94a8-f5c649230194@6c48a",
