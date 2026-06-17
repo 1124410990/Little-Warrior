@@ -66,7 +66,7 @@ TrainingRoom
 | 节点 | 推荐位置 | 说明 |
 | --- | --- | --- |
 | `Player` | `(-360, -100, 0)` | 玩家初始点，靠左方便验证怪物追击 |
-| `HitBoxRoot` | `(70, 0, 0)` | 攻击框朝向基准，脚本会按角色朝向镜像 |
+| `HitBoxRoot` | `(36, 0, 0)` | 攻击框朝向基准，脚本会按角色朝向镜像 |
 | `WeaponPivot` | `(24, -14, 0)` | 武器待机轴心，普攻和疾风刺动画都依赖它 |
 | `Enemy_Slime_1` | `(360, -80, 0)` | 对齐 `room_training_01.json` 第 1 个刷怪点 |
 | `Enemy_Slime_2` | `(560, -140, 0)` | 错开纵深，便于验证上下走位 |
@@ -91,7 +91,7 @@ Bootstrap 路径不需要手动绑定 `DungeonRoomManager`、玩家、怪物或 
 | `Player` | `RigidBody2D` | `type=Kinematic`，`gravityScale=0` |
 | `Player` | `BoxCollider2D` | 推荐尺寸 `48 x 90`，`sensor=false` |
 | `HitBox` | `HitBox` | `owner=Player` |
-| `HitBox` | `BoxCollider2D` | 推荐尺寸 `132 x 84`，`sensor=true`，初始 `enabled=false` |
+| `HitBox` | `BoxCollider2D` | 推荐尺寸 `72 x 84`，`sensor=true`，初始 `enabled=false` |
 | `HitBox` | `Graphics` | 用于绘制 `slash_wave` 剑形残影 |
 
 `PlayerVisual` 只承担身体朝向镜像；`WeaponPivot` 单独承载武器动画，避免身体翻转和武器前刺互相污染。

@@ -17,3 +17,5 @@ Thumbs.db
 # 编辑器与本地配置
 .idea/
 .vscode/
+.omx/
+.omc/

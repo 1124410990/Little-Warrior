@@ -1,5 +1,33 @@
 # 角色精灵图集成指南
 
+> ⚠️ **2026-06-16 更新：实际接入流程已自动化，本文顶部为现行流程；下方“步骤1~步骤7”
+> 的手动 64×64 网格切分与 prefab 配置说明已过时，仅作历史参考，不要再照做。**
+>
+> 实际拿到的 13 张素材并非 64×64 网格图，而是 AI 生成的不规则大图（如 `player_warrior_idle`
+> 为 1983×793，每帧宽非整数），且**没有真正的透明通道**——“透明背景”是画进像素的灰色棋盘格。
+> 项目里也没有任何 `.prefab`，角色由 `TrainingRoomBootstrap` 在运行时程序化搭建。
+>
+> ## 现行流程（自动化，三步）
+>
+> 1. **放图**：把 13 张精灵表放到 `assets/textures/characters/`（文件名见下方清单）。
+> 2. **切片**：运行 `npm run slice:characters`。脚本（`scripts/slice-character-sheets.mjs`）会：
+>    - 从四边 flood-fill 把棋盘格背景转成真正的 alpha 透明（角色内部银剑/白高光因被描边
+>      包围、不连通边缘而保留）；
+>    - 按内容间隙切帧，相邻帧贴在一起时按中位帧宽等分补切；
+>    - 每帧裁紧后统一贴到同角色一致画布（水平居中、底部对齐），输出到
+>      `assets/resources/textures/characters/<clip名>/00.png …`；
+>    - 检测帧数与期望不符时**报错中止**（不静默接受错帧）。
+> 3. **生成 .meta 并运行**：用 Cocos 编辑器打开项目一次，让其为新 PNG 生成 sprite-frame
+>    `.meta`，然后 Play。`TrainingRoomBootstrap` 会用 `resources.loadDir` 加载帧、
+>    `AnimationClip.createWithSpriteFrames` 在运行时建动画，并接到 `PlayerController.animation`
+>    / `EnemyAI.animation`。加载失败时自动回退到程序化色块占位图。
+>
+> clip 名、帧数、FPS、循环的唯一事实源是 `scripts/slice-character-sheets.mjs` 的 `SHEETS`
+> 表与 `TrainingRoomBootstrap.ts` 的 `PLAYER_CLIP_SPECS` / `ENEMY_CLIP_SPECS`，改帧率/循环
+> 在那里改即可，无需手动建 AnimationClip。
+>
+> ---
+
 本文档说明如何将新生成的角色精灵图集成到 LittleWarrior 项目的 Cocos Creator 中。
 
 ## 前置准备

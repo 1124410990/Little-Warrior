@@ -97,6 +97,10 @@ export class PlayerController extends CharacterBase {
 
     const action = getCombatActionFromInput(code);
     if (action === 'basicAttack') {
+      if (!this.canStartBasicAttack()) {
+        return;
+      }
+
       this.stateMachine.transitionTo('attack', { reenter: true });
       return;
     }
@@ -117,13 +121,26 @@ export class PlayerController extends CharacterBase {
     return resolveMoveVector(this.pressedCodes);
   }
 
+  private canStartBasicAttack(): boolean {
+    if (this.attackLock > 0) {
+      return false;
+    }
+
+    return this.skillComponent?.canCast(this.getNextBasicAttackId()) ?? true;
+  }
+
+  private getNextBasicAttackId(): string {
+    const nextComboIndex = this.comboTimer > 0 ? (this.comboIndex % 3) + 1 : 1;
+    return `basic_${nextComboIndex}`;
+  }
+
   /*
    * 三段普攻由连击计时器衔接；超时后重新从第一段开始，便于独立调整连击节奏。
    */
   private playAttack(): void {
     this.comboIndex = this.comboTimer > 0 ? (this.comboIndex % 3) + 1 : 1;
-    this.comboTimer = 0.45;
-    this.attackLock = 0.28;
+    this.comboTimer = 0.55;
+    this.attackLock = 0.34;
     this.playAnimation(`player_attack_${this.comboIndex}`);
     this.playWeaponSlash();
     this.skillComponent?.cast(`basic_${this.comboIndex}`, this.getFacing());

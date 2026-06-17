@@ -54,9 +54,19 @@ export class EnemyAI extends CharacterBase {
   private attackTween: Tween<Node> | null = null;
   private patrolDirection = -1;
   private defeatedHandled = false;
+  // visual 的基准缩放由显示高度决定（原图远大于显示尺寸），前扑动画必须以此为基准，否则会放大回原图尺寸。
+  private baseVisualScaleX = 1;
+  private baseVisualScaleY = 1;
+  private baseVisualPosition = new Vec3();
 
   override start(): void {
     super.start();
+    if (this.facingVisualRoot) {
+      const baseScale = this.facingVisualRoot.scale;
+      this.baseVisualScaleX = Math.abs(baseScale.x);
+      this.baseVisualScaleY = baseScale.y;
+      this.baseVisualPosition = this.facingVisualRoot.position.clone();
+    }
     this.stateMachine = new StateMachine<EnemyState, EnemyAI>(this, {
       idle: { enter: (ctx) => ctx.playAnimation('enemy_idle') },
       patrol: { enter: (ctx) => ctx.playAnimation('enemy_walk') },
@@ -252,16 +262,24 @@ export class EnemyAI extends CharacterBase {
     const peak = resolveMeleeLungePose(0.35, facing);
     const end = resolveMeleeLungePose(1, facing);
     this.attackTween?.stop();
-    visual.setPosition(start.x, 0, 0);
-    visual.setScale(new Vec3(facing * start.scaleX, start.scaleY, 1));
+    visual.setPosition(this.resolveAttackVisualPosition(start.x));
+    visual.setScale(new Vec3(facing * this.baseVisualScaleX * start.scaleX, this.baseVisualScaleY * start.scaleY, 1));
     this.attackTween = tween(visual)
-      .to(0.12, { position: new Vec3(peak.x, 0, 0), scale: new Vec3(facing * peak.scaleX, peak.scaleY, 1) })
-      .to(0.2, { position: new Vec3(end.x, 0, 0), scale: new Vec3(facing * end.scaleX, end.scaleY, 1) })
+      .to(0.12, { position: this.resolveAttackVisualPosition(peak.x), scale: new Vec3(facing * this.baseVisualScaleX * peak.scaleX, this.baseVisualScaleY * peak.scaleY, 1) })
+      .to(0.2, { position: this.resolveAttackVisualPosition(end.x), scale: new Vec3(facing * this.baseVisualScaleX * end.scaleX, this.baseVisualScaleY * end.scaleY, 1) })
       .call(() => {
         this.attackTween = null;
         this.resetAttackMotion();
       })
       .start();
+  }
+
+  private resolveAttackVisualPosition(offsetX: number): Vec3 {
+    return new Vec3(
+      this.baseVisualPosition.x + offsetX,
+      this.baseVisualPosition.y,
+      this.baseVisualPosition.z,
+    );
   }
 
   private stopAttackMotion(): void {
@@ -276,7 +294,7 @@ export class EnemyAI extends CharacterBase {
       return;
     }
 
-    visual.setPosition(0, 0, 0);
-    visual.setScale(new Vec3(this.getFacing(), 1, 1));
+    visual.setPosition(this.baseVisualPosition);
+    visual.setScale(new Vec3(this.getFacing() * this.baseVisualScaleX, this.baseVisualScaleY, 1));
   }
 }

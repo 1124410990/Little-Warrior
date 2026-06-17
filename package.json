@@ -7,9 +7,13 @@
   "littleWarriorVersion": "0.1.0",
   "scripts": {
     "test": "node ./tests/combat.test.mjs",
-    "verify:training-room": "node ./scripts/verify-training-room.mjs"
+    "verify:training-room": "node ./scripts/verify-training-room.mjs",
+    "slice:characters": "node ./scripts/slice-character-sheets.mjs"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "pngjs": "7.0.0",
+    "typescript": "^5.4.5"
+  },
   "creator": {
     "version": "3.8.8"
   },

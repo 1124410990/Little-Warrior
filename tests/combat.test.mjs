@@ -77,7 +77,7 @@ assert.equal(shouldApplyTimedAttackDamage(0.28, 0.22, false, 0.28), true);
 const characterConfigText = readFileSync(new URL('../assets/resources/config/characters.json', import.meta.url), 'utf8').replace(/^\uFEFF/, '');
 const characterConfig = JSON.parse(characterConfigText);
 assert.equal(characterConfig.enemy_slime.moveSpeed, 85);
-assert.equal(characterConfig.enemy_slime.attackRange, 96);
+assert.equal(characterConfig.enemy_slime.attackRange, 84);
 assert.equal(characterConfig.enemy_slime.attackCooldown, 1.35);
 const skillConfigText = readFileSync(new URL('../assets/resources/config/skills.json', import.meta.url), 'utf8').replace(/^\uFEFF/, '');
 const skillConfig = JSON.parse(skillConfigText);
@@ -88,7 +88,7 @@ const playerConfig = getCharacterConfig(characterConfig, 'player_warrior');
 const enemyConfig = getEnemyConfig(characterConfig, roomConfig.enemyPrefab);
 const slashWave = getSkillConfig(skillConfig, 'slash_wave');
 assert.equal(playerConfig.attack, 36);
-assert.equal(enemyConfig.attackRange, 96);
+assert.equal(enemyConfig.attackRange, 84);
 assert.equal(calculateDamage({ attack: slashWave.attack, defense: enemyConfig.defense, skillPower: slashWave.skillPower }), 103);
 
 const tunedSkills = {

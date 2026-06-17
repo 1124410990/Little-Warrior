@@ -19,7 +19,7 @@
     "hitStun": 0.2,
     "invulnerableTime": 0.08,
     "aggroRange": 360,
-    "attackRange": 96,
+    "attackRange": 84,
     "attackCooldown": 1.35
   }
 }
